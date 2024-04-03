@@ -10,7 +10,7 @@ import java.time.LocalDate;
 
 
 @Entity
-class Congees {
+public class Congees {
     @Id
     private Long id;
     private LocalDate dateDebut;

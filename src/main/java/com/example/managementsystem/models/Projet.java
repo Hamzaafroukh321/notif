@@ -12,7 +12,7 @@ import java.util.List;
 
 
 @Entity
-class Projet {
+public class Projet {
 
     @Id
     private Long id;

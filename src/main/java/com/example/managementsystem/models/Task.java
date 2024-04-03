@@ -9,7 +9,7 @@ import jakarta.persistence.JoinColumn;
 
 
 
-@Entity
+public @Entity
 class Task {
     @Id
     private Long id;

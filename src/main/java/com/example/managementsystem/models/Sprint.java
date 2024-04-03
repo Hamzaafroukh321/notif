@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Entity
-class Sprint {
+public class Sprint {
     @Id
     private Long id;
     private String nom;

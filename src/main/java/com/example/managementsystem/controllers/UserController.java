@@ -1,8 +1,11 @@
 package com.example.managementsystem.controllers;
 
 import com.example.managementsystem.models.User;
+import com.example.managementsystem.models.UserRole;
 import com.example.managementsystem.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,14 +19,16 @@ public class UserController {
         this.userService = userService;
     }
 
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<User> createUser(@RequestBody User user) {
+        User savedUser = userService.saveUser(user);
+        return ResponseEntity.ok(savedUser);
+    }
+
     @GetMapping("/{matricule}")
     public User getUserByMatricule(@PathVariable Long matricule) {
         return userService.getUserByMatricule(matricule);
-    }
-
-    @PostMapping
-    public User saveUser(@RequestBody User user) {
-        return userService.saveUser(user);
     }
 
     @DeleteMapping("/{matricule}")

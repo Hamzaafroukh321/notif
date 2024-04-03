@@ -8,7 +8,7 @@ import java.util.List;
 import jakarta.persistence.JoinColumn;
 
 @Entity
-class Backlog {
+public class Backlog {
     @Id
     private Integer id;
     private String titre;
