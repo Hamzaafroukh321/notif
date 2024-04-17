@@ -27,6 +27,8 @@ public class User implements UserDetails {
     private Long matricule;
     private String nom;
     private String prenom;
+    private String emailpersonnel;
+
     private String email;
     @Column(nullable = false)
     private String password;
@@ -52,7 +54,7 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override
@@ -184,5 +186,13 @@ public class User implements UserDetails {
 
     public void setCivilite(String civilite) {
         this.civilite = civilite;
+    }
+
+    public String getEmailpersonnel() {
+        return emailpersonnel;
+    }
+
+    public void setEmailpersonnel(String emailpersonnel) {
+        this.emailpersonnel = emailpersonnel;
     }
 }

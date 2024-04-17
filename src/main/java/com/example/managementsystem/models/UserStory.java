@@ -11,6 +11,10 @@ class UserStory {
     private Long id;
     private String description;
 
+    private String priority;
+
+
+
     @ManyToOne
     @JoinColumn(name = "backlog_id")
     private Backlog backlog;
@@ -37,5 +41,13 @@ class UserStory {
 
     public void setBacklog(Backlog backlog) {
         this.backlog = backlog;
+    }
+
+    public String getPriority() {
+        return priority;
+    }
+
+    public void setPriority(String priority) {
+        this.priority = priority;
     }
 }

@@ -9,5 +9,6 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     User findByMatricule(Long matricule);
     Optional<User> findByEmail(String email);
+    Optional<User> findByEmailpersonnel(String emailpersonnel);
 
 }

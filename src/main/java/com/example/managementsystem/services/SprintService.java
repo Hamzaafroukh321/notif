@@ -1,12 +1,13 @@
 package com.example.managementsystem.services;
 
+import com.example.managementsystem.exceptions.BadRequestException;
+import com.example.managementsystem.exceptions.NotFoundException;
 import com.example.managementsystem.models.Sprint;
 import com.example.managementsystem.repositories.SprintRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class SprintService {
@@ -18,34 +19,33 @@ public class SprintService {
         this.sprintRepository = sprintRepository;
     }
 
-    public Sprint createSprint(Sprint sprint) {
-        return sprintRepository.save(sprint);
+    public List<Sprint> getAllSprints() {
+        return sprintRepository.findAll();
     }
 
     public Sprint getSprintById(Long id) {
-        Optional<Sprint> sprint = sprintRepository.findById(id);
-        return sprint.orElse(null);
+        return sprintRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Sprint non trouvé avec l'ID : " + id));
     }
 
-    public Sprint updateSprint(Long id, Sprint updatedSprint) {
-        Optional<Sprint> optionalSprint = sprintRepository.findById(id);
-        if (optionalSprint.isPresent()) {
-            Sprint existingSprint = optionalSprint.get();
-            existingSprint.setNom(updatedSprint.getNom());
-            existingSprint.setDateDebut(updatedSprint.getDateDebut());
-            existingSprint.setDateFin(updatedSprint.getDateFin());
-            existingSprint.setProjet(updatedSprint.getProjet());
-            existingSprint.setTasks(updatedSprint.getTasks());
-            return sprintRepository.save(existingSprint);
+    public Sprint createSprint(Sprint sprint) {
+        if (sprint.getNom() == null || sprint.getDateDebut() == null || sprint.getDateFin() == null || sprint.getProjet() == null) {
+            throw new BadRequestException("Les informations du sprint sont incomplètes.");
         }
-        return null;
+        return sprintRepository.save(sprint);
+    }
+
+    public Sprint updateSprint(Long id, Sprint sprintDetails) {
+        Sprint sprint = getSprintById(id);
+        sprint.setNom(sprintDetails.getNom());
+        sprint.setDateDebut(sprintDetails.getDateDebut());
+        sprint.setDateFin(sprintDetails.getDateFin());
+        sprint.setProjet(sprintDetails.getProjet());
+        return sprintRepository.save(sprint);
     }
 
     public void deleteSprint(Long id) {
-        sprintRepository.deleteById(id);
-    }
-
-    public List<Sprint> getAllSprints() {
-        return sprintRepository.findAll();
+        Sprint sprint = getSprintById(id);
+        sprintRepository.delete(sprint);
     }
 }

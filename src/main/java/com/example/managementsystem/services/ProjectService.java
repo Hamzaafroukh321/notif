@@ -1,10 +1,16 @@
 package com.example.managementsystem.services;
 
+import com.example.managementsystem.controllers.NotificationController;
+import com.example.managementsystem.exceptions.BadRequestException;
+import com.example.managementsystem.models.Notification;
 import com.example.managementsystem.models.Projet;
+import com.example.managementsystem.models.User;
 import com.example.managementsystem.repositories.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,14 +18,38 @@ import java.util.Optional;
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
+    private final NotificationController notificationController;
+
 
     @Autowired
-    public ProjectService(ProjectRepository projectRepository) {
+    public ProjectService(ProjectRepository projectRepository, NotificationController notificationController) {
         this.projectRepository = projectRepository;
+        this.notificationController = notificationController;
     }
 
+    @PreAuthorize("hasRole('MANAGER')")
     public Projet createProject(Projet projet) {
-        return projectRepository.save(projet);
+        if (projet.getChef() == null || projet.getTeamMembers() == null || projet.getTeamMembers().isEmpty()) {
+            throw new BadRequestException("L'équipe et le chef de projet doivent être définis.");
+        }
+        if (projet.getNom() == null || projet.getDescription() == null || projet.getDateDebut() == null || projet.getDateFin() == null || projet.getMode() == null) {
+            throw new BadRequestException("Les informations du projet sont incomplètes.");
+        }
+        Projet savedProjet = projectRepository.save(projet);
+        notifyTeamsAboutNewProject(savedProjet);
+        return savedProjet;
+    }
+
+    private void notifyTeamsAboutNewProject(Projet projet) {
+
+        List<User> teamMembers = projet.getTeamMembers();
+        for (User member : teamMembers) {
+            Notification notification = new Notification();
+            notification.setMessage("Un nouveau projet a été créé : " + projet.getNom());
+            notification.setTimestamp(LocalDateTime.now());
+            notification.setRecipient(member.getEmail());
+            notificationController.sendNotification(notification);
+        }
     }
 
     public Projet getProjectById(Long id) {

@@ -3,6 +3,8 @@ package com.example.managementsystem.controllers;
 import com.example.managementsystem.models.Congees;
 import com.example.managementsystem.services.CongeesService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,9 +20,23 @@ public class CongeesController {
         this.congeesService = congeesService;
     }
 
-    @PostMapping
+
+    @PreAuthorize("hasRole('MANAGER') or hasRole('TEAM_MEMBER')")
+    @PostMapping("/requests")
     public Congees createCongees(@RequestBody Congees congees) {
         return congeesService.createCongees(congees);
+    }
+    @PreAuthorize("hasRole('MANAGER')")
+    @PutMapping("/requests/{congeesId}/approve")
+    public ResponseEntity<Congees> approveCongees(@PathVariable Long congeesId) {
+        Congees approvedCongees = congeesService.approveCongees(congeesId);
+        return ResponseEntity.ok(approvedCongees);
+    }
+    @PreAuthorize("hasRole('MANAGER')")
+    @PutMapping("/requests/{congeesId}/reject")
+    public ResponseEntity<Congees> rejectCongees(@PathVariable Long congeesId, @RequestBody String motif) {
+        Congees rejectedCongees = congeesService.rejectCongees(congeesId, motif);
+        return ResponseEntity.ok(rejectedCongees);
     }
 
     @GetMapping("/{id}")

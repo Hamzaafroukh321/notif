@@ -1,8 +1,12 @@
 package com.example.managementsystem.controllers;
 
+import com.example.managementsystem.exceptions.BadRequestException;
 import com.example.managementsystem.models.Projet;
 import com.example.managementsystem.services.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,9 +22,16 @@ public class ProjectController {
         this.projectService = projectService;
     }
 
-    @PostMapping
-    public Projet createProject(@RequestBody Projet projet) {
-        return projectService.createProject(projet);
+
+    @PostMapping("/projects")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<Projet> createProject(@RequestBody Projet projet) {
+        try {
+            Projet createdProjet = projectService.createProject(projet);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdProjet);
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 
     @GetMapping("/{id}")
