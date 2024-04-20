@@ -27,8 +27,8 @@ public class UserService {
     public User getUserByMatricule(Long matricule) {
         return userRepository.findByMatricule(matricule);
     }
-    
-    @PreAuthorize("hasRole('ADMIN')")
+
+    @PreAuthorize("hasAuthority('ADMIN')")
     public User saveUser(User user) {
         if (userRepository.findByEmailpersonnel(user.getEmailpersonnel()).isPresent()) {
             throw new DataIntegrityViolationException("Personal email already exists");
@@ -46,7 +46,7 @@ public class UserService {
                 "Mot de passe: " + password + "\n";
 
 
-        emailService.sendEmail(to, subject, text);
+        //emailService.sendEmail(to, subject, text);
 
         return savedUser;
     }
@@ -74,6 +74,7 @@ public class UserService {
         User user = getUserByMatricule(matricule);
         userRepository.delete(user);
     }
+
 
     public User saveAndFlushUser(User user) {
         return userRepository.saveAndFlush(user);

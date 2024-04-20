@@ -12,6 +12,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,18 +26,26 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
     @SequenceGenerator(name = "user_seq", initialValue = 10000, allocationSize = 1)
     private Long matricule;
+    @NotBlank(message = "Le nom est obligatoire")
     private String nom;
+    @NotBlank(message = "Le prénom est obligatoire")
     private String prenom;
+    @Column(nullable = false)
     private String emailpersonnel;
-
+    @Column(nullable = false)
     private String email;
     @Column(nullable = false)
     private String password;
+    @NotBlank(message = "Le numéro de téléphone est obligatoire")
     private String tel;
+    @NotBlank(message = "L'adresse est obligatoire")
     private String adresse;
 
+    @NotBlank(message = "Le département est obligatoire")
     private String departement;
 
+
+    @NotBlank(message = "La civilité est obligatoire")
     private String civilite;
 
 

@@ -13,8 +13,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.example.managementsystem.exceptions.BadRequestException;
 import com.example.managementsystem.exceptions.NotFoundException;
 import com.example.managementsystem.models.ErrorResponse;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
-
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @ControllerAdvice
@@ -59,7 +62,15 @@ public class GlobalExceptionHandler {
 
 
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        String errorMessage = ex.getBindingResult().getFieldErrors().stream()
+                .map(FieldError::getDefaultMessage)
+                .collect(Collectors.joining(", "));
 
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), errorMessage);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
 
 
 }

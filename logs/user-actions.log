@@ -46,3 +46,21 @@
 17:44:59.777 [http-nio-8080-exec-1] INFO  c.e.m.controllers.AuthController - User john.doe@example.com logged in successfully
 17:46:15.271 [http-nio-8080-exec-1] INFO  c.e.m.controllers.AuthController - User john.doe@example.com logged in successfully
 17:50:27.287 [http-nio-8080-exec-4] INFO  c.e.m.controllers.AuthController - User john.doe@example.com logged in successfully
+17:52:24.539 [http-nio-8080-exec-2] INFO  c.e.m.controllers.AuthController - User john.doe@example.com logged in successfully
+06:36:56.846 [http-nio-8080-exec-2] INFO  c.e.m.controllers.AuthController - User john.doe@example.com logged in successfully
+06:43:46.077 [http-nio-8080-exec-2] INFO  c.e.m.controllers.AuthController - User john.doe@example.com logged in successfully
+06:50:13.534 [http-nio-8080-exec-3] INFO  c.e.m.controllers.AuthController - User john.doe@example.com logged in successfully
+06:59:42.391 [http-nio-8080-exec-1] INFO  c.e.m.controllers.AuthController - User john.doe@example.com logged in successfully
+07:04:24.747 [http-nio-8080-exec-1] INFO  c.e.m.controllers.AuthController - User john.doe@example.com logged in successfully
+07:09:01.060 [http-nio-8080-exec-1] INFO  c.e.m.controllers.AuthController - User john.doe@example.com logged in successfully
+07:09:46.960 [http-nio-8080-exec-3] INFO  c.e.m.config.LoggingAspect - User Created successfully: hamzaafroukh01@dxc.com
+07:35:37.228 [http-nio-8080-exec-8] INFO  c.e.m.controllers.AuthController - User john.doe@example.com logged in successfully
+07:45:04.432 [http-nio-8080-exec-3] INFO  c.e.m.controllers.AuthController - User john.doe@example.com logged in successfully
+08:05:27.145 [http-nio-8080-exec-6] INFO  c.e.m.controllers.AuthController - User john.doe@example.com logged in successfully
+14:03:56.737 [http-nio-8080-exec-9] INFO  c.e.m.config.LoggingAspect - User Created successfully: hamzaafroukh01@dxc.com
+14:18:33.367 [http-nio-8080-exec-2] INFO  c.e.m.controllers.AuthController - User john.doe@example.com logged in successfully
+14:48:11.735 [http-nio-8080-exec-2] INFO  c.e.m.controllers.AuthController - User john.doe@example.com logged in successfully
+14:48:22.994 [http-nio-8080-exec-4] INFO  c.e.m.config.LoggingAspect - User Created successfully: hamzaafroukh011@dxc.com
+14:53:35.293 [http-nio-8080-exec-6] INFO  c.e.m.controllers.AuthController - User john.doe@example.com logged in successfully
+14:54:24.328 [http-nio-8080-exec-3] INFO  c.e.m.config.LoggingAspect - User Created successfully: hamzaafroukh010@dxc.com
+02:15:50.626 [http-nio-8080-exec-2] INFO  c.e.m.controllers.AuthController - User john.doe@example.com logged in successfully

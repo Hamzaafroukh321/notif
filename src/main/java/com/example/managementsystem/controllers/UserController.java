@@ -3,6 +3,7 @@ package com.example.managementsystem.controllers;
 import com.example.managementsystem.models.User;
 import com.example.managementsystem.models.UserRole;
 import com.example.managementsystem.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,9 +19,9 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
+    public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
         User savedUser = userService.saveUser(user);
         return ResponseEntity.ok(savedUser);
     }

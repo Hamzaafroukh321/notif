@@ -65,7 +65,7 @@ public class SecurityConfig {
     @Bean
     public RoleHierarchyImpl roleHierarchy() {
         RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
-        String hierarchy = "ROLE_ADMIN > ROLE_USER";
+        String hierarchy = "ADMIN > USER";
         roleHierarchy.setHierarchy(hierarchy);
         return roleHierarchy;
     }

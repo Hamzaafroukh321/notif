@@ -28,15 +28,26 @@
             <onMismatch>DENY</onMismatch>
         </filter>
     </appender>
+   //je veux que les except_ions soient pas affiche dans file_user_actions
 
     <appender name="FILE_USER_ACTIONS" class="ch.qos.logback.core.FileAppender">
         <file>logs/user-actions.log</file>
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
+
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
     </appender>
 
     <logger name="com.example.managementsystem.controllers" level="INFO" additivity="false">
+        <appender-ref ref="FILE_USER_ACTIONS" />
+    </logger>
+
+    <logger name="com.example.managementsystem.config.LoggingAspect" level="INFO" additivity="false">
         <appender-ref ref="FILE_USER_ACTIONS" />
     </logger>
 

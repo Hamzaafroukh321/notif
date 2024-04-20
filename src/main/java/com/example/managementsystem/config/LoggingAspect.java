@@ -20,6 +20,8 @@ public class LoggingAspect {
 
     private static final Logger logger = LoggerFactory.getLogger(LoggingAspect.class);
 
+
+
     /**
      * Pointcut that matches all repositories, services and Web REST endpoints.
      */
@@ -83,6 +85,13 @@ public class LoggingAspect {
         }
 
         return result;
+    }
+
+
+
+    @AfterReturning(pointcut = "execution(* com.example.managementsystem.services.UserService.saveUser(..))", returning = "user")
+    public void logUserCreation(User user) {
+        logger.info("User Created successfully: {}", user.getEmail());
     }
 
     @AfterReturning(pointcut = "execution(* com.example.managementsystem.services.ProjectService.createProject(..))", returning = "projet")
