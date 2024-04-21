@@ -1,7 +1,6 @@
 package com.example.managementsystem.controllers;
 
-import com.example.managementsystem.models.User;
-import com.example.managementsystem.models.UserRole;
+import com.example.managementsystem.DTO.UserDTO;
 import com.example.managementsystem.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,15 +18,16 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
-    @PreAuthorize("hasAuthority('ADMIN')")
+
+
     @PostMapping
-    public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
-        User savedUser = userService.saveUser(user);
-        return ResponseEntity.ok(savedUser);
+    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDTO) {
+        UserDTO savedUserDTO = userService.saveUser(userDTO);
+        return ResponseEntity.ok(savedUserDTO);
     }
 
     @GetMapping("/{matricule}")
-    public User getUserByMatricule(@PathVariable Long matricule) {
+    public UserDTO getUserByMatricule(@PathVariable Long matricule) {
         return userService.getUserByMatricule(matricule);
     }
 
@@ -37,7 +37,7 @@ public class UserController {
     }
 
     @PutMapping
-    public User saveAndFlushUser(@RequestBody User user) {
-        return userService.saveAndFlushUser(user);
+    public UserDTO saveAndFlushUser(@RequestBody UserDTO userDTO) {
+        return userService.saveAndFlushUser(userDTO);
     }
 }

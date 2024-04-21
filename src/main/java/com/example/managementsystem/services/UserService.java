@@ -1,86 +1,90 @@
 package com.example.managementsystem.services;
 
+import com.example.managementsystem.DTO.UserDTO;
 import com.example.managementsystem.config.PasswordGenerator;
-import com.example.managementsystem.exceptions.BadRequestException;
-import com.example.managementsystem.models.User;
+import com.example.managementsystem.exceptions.NotFoundException;
+import com.example.managementsystem.mappers.UserMapper;
+import com.example.managementsystem.models.entities.User;
 import com.example.managementsystem.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
 
 @Service
+@Transactional
 public class UserService {
-
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final UserMapper userMapper;
+
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, EmailService emailService, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
+        this.userMapper = userMapper;
     }
 
-
-    public User getUserByMatricule(Long matricule) {
-        return userRepository.findByMatricule(matricule);
+    public UserDTO getUserByMatricule(Long matricule) {
+        User user = userRepository.findByMatricule(matricule)
+                .orElseThrow(() -> new NotFoundException("User not found with matricule: " + matricule));
+        return userMapper.toDTO(user);
     }
-
     @PreAuthorize("hasAuthority('ADMIN')")
-    public User saveUser(User user) {
-        if (userRepository.findByEmailpersonnel(user.getEmailpersonnel()).isPresent()) {
-            throw new DataIntegrityViolationException("Personal email already exists");
-        }
-
+    public UserDTO saveUser(UserDTO userDTO) {
         String password = PasswordGenerator.generatePassword();
+        User user = userMapper.toEntity(userDTO);
         user.setPassword(passwordEncoder.encode(password));
 
         User savedUser = userRepository.save(user);
+        UserDTO savedUserDTO = userMapper.toDTO(savedUser);
 
-        String to = user.getEmailpersonnel();
-        String subject = "Votre nouveau compte utilisateur";
-        String text = "Matricule: " + savedUser.getMatricule() + "\n" +
-                "Email professionnel: " + savedUser.getEmail() + "\n" +
-                "Mot de passe: " + password + "\n";
+        //sendNewUserEmail(savedUserDTO, password);
 
-
-        //emailService.sendEmail(to, subject, text);
-
-        return savedUser;
+        return savedUserDTO;
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    public User updateUser(Long matricule, User updatedUser) {
-        User existingUser = getUserByMatricule(matricule);
+    public UserDTO updateUser(Long matricule, UserDTO updatedUserDTO) {
+        User existingUser = userRepository.findByMatricule(matricule)
+                .orElseThrow(() -> new NotFoundException("User not found with matricule: " + matricule));
 
-        if (!existingUser.getMatricule().equals(updatedUser.getMatricule())) {
-            throw new BadRequestException("Cannot change user matricule");
-        }
-
-        existingUser.setNom(updatedUser.getNom());
-        existingUser.setPrenom(updatedUser.getPrenom());
-        existingUser.setEmail(updatedUser.getEmail());
-        existingUser.setTel(updatedUser.getTel());
-        existingUser.setAdresse(updatedUser.getAdresse());
-        existingUser.setRole(updatedUser.getRole());
-
-        return userRepository.save(existingUser);
+        userMapper.updateUserFromDTO(existingUser, updatedUserDTO);
+        User savedUser = userRepository.save(existingUser);
+        return userMapper.toDTO(savedUser);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     public void deleteUserByMatricule(Long matricule) {
-        User user = getUserByMatricule(matricule);
+        User user = userRepository.findByMatricule(matricule)
+                .orElseThrow(() -> new NotFoundException("User not found with matricule: " + matricule));
+
         userRepository.delete(user);
     }
 
-
-    public User saveAndFlushUser(User user) {
-        return userRepository.saveAndFlush(user);
+    public UserDTO saveAndFlushUser(UserDTO userDTO) {
+        User user = userMapper.toEntity(userDTO);
+        User savedUser = userRepository.saveAndFlush(user);
+        return userMapper.toDTO(savedUser);
     }
 
+    private void sendNewUserEmail(UserDTO userDTO, String password) {
+        String to = userDTO.emailpersonnel();
+        String subject = "Votre nouveau compte utilisateur";
+        String text = "Matricule: " + userDTO.matricule() + "\n" +
+                "Email professionnel: " + userDTO.email() + "\n" +
+                "Mot de passe: " + password + "\n";
 
+        emailService.sendEmail(to, subject, text);
+    }
 
-
+    public List<UserDTO> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return userMapper.toDTOs(users);
+    }
 }

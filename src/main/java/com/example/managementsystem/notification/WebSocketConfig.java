@@ -1,4 +1,4 @@
-package com.example.managementsystem.config;
+package com.example.managementsystem.notification;
 
 
 

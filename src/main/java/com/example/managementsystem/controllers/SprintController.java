@@ -1,9 +1,8 @@
 package com.example.managementsystem.controllers;
 
-import com.example.managementsystem.models.Sprint;
+import com.example.managementsystem.DTO.SprintDTO;
 import com.example.managementsystem.services.SprintService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,37 +12,33 @@ import java.util.List;
 public class SprintController {
     private final SprintService sprintService;
 
+    @Autowired
     public SprintController(SprintService sprintService) {
         this.sprintService = sprintService;
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('PROJECT_MANAGER')")
-    public List<Sprint> getAllSprints() {
+    public List<SprintDTO> getAllSprints() {
         return sprintService.getAllSprints();
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('PROJECT_MANAGER')")
-    public Sprint getSprintById(@PathVariable Long id) {
+    public SprintDTO getSprintById(@PathVariable Long id) {
         return sprintService.getSprintById(id);
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('PROJECT_MANAGER')")
-    public Sprint createSprint(@RequestBody Sprint sprint) {
-        return sprintService.createSprint(sprint);
+    public SprintDTO createSprint(@RequestBody SprintDTO sprintDTO) {
+        return sprintService.createSprint(sprintDTO);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('PROJECT_MANAGER')")
-    public Sprint updateSprint(@PathVariable Long id, @RequestBody Sprint sprintDetails) {
-        return sprintService.updateSprint(id, sprintDetails);
+    public SprintDTO updateSprint(@PathVariable Long id, @RequestBody SprintDTO sprintDTO) {
+        return sprintService.updateSprint(id, sprintDTO);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('PROJECT_MANAGER')")
     public void deleteSprint(@PathVariable Long id) {
-        sprintService.deleteSprint(id);
+        sprintService.deleteSprintById(id);
     }
 }

@@ -1,50 +1,66 @@
 package com.example.managementsystem.services;
 
+import com.example.managementsystem.DTO.BacklogDTO;
 import com.example.managementsystem.exceptions.NotFoundException;
-import com.example.managementsystem.models.Backlog;
+import com.example.managementsystem.mappers.BacklogMapper;
+import com.example.managementsystem.models.entities.Backlog;
 import com.example.managementsystem.repositories.BacklogRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
+@Transactional
 public class BacklogService {
     private final BacklogRepository backlogRepository;
+    private final BacklogMapper backlogMapper;
+    private final ProjetService projetService;
 
-    public BacklogService(BacklogRepository backlogRepository) {
+    @Autowired
+    public BacklogService(BacklogRepository backlogRepository, BacklogMapper backlogMapper, ProjetService projetService) {
         this.backlogRepository = backlogRepository;
+        this.backlogMapper = backlogMapper;
+        this.projetService = projetService;
+    }
+    // Get all backlogs
+
+    public List<BacklogDTO> getAllBacklogs() {
+        List<Backlog> backlogs = backlogRepository.findAll();
+        return backlogMapper.toDTOs(backlogs);
+    }
+    public BacklogDTO getBacklogById(Integer id) {
+        Backlog backlog = backlogRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Backlog not found with id: " + id));
+        return backlogMapper.toDTO(backlog);
     }
 
-    public List<Backlog> getAllBacklogs() {
-        return backlogRepository.findAll();
+    public BacklogDTO createBacklog(BacklogDTO backlogDTO) {
+        // Vérifier si le projet existe
+        projetService.getProjetById(backlogDTO.projetId());
+
+        Backlog backlog = backlogMapper.toEntity(backlogDTO);
+        Backlog savedBacklog = backlogRepository.save(backlog);
+        return backlogMapper.toDTO(savedBacklog);
     }
 
-    public Backlog getBacklogById(Integer id) {
-        return backlogRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Backlog non trouvé avec l'ID : " + id));
+    public BacklogDTO updateBacklog(Integer id, BacklogDTO updatedBacklogDTO) {
+        Backlog existingBacklog = backlogRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Backlog not found with id: " + id));
+
+        // Vérifier si le projet existe
+        projetService.getProjetById(updatedBacklogDTO.projetId());
+
+        backlogMapper.updateBacklogFromDTO(updatedBacklogDTO, existingBacklog);
+        Backlog savedBacklog = backlogRepository.save(existingBacklog);
+        return backlogMapper.toDTO(savedBacklog);
     }
 
-    public Backlog createBacklog(Backlog backlog) {
-        if (backlog.getTitre() == null || backlog.getTitre().isEmpty()) {
-            throw new NotFoundException("Le titre du backlog est obligatoire");
-        }
-        return backlogRepository.save(backlog);
-    }
+    public void deleteBacklogById(Integer id) {
+        Backlog backlog = backlogRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Backlog not found with id: " + id));
 
-    public Backlog updateBacklog(Integer id, Backlog backlogDetails) {
-        Backlog backlog = getBacklogById(id);
-        if (backlogDetails.getTitre() == null || backlogDetails.getTitre().isEmpty()) {
-            throw new NotFoundException("Le titre du backlog est obligatoire");
-        }
-        backlog.setTitre(backlogDetails.getTitre());
-        backlog.setDescription(backlogDetails.getDescription());
-        backlog.setEtat(backlogDetails.getEtat());
-        return backlogRepository.save(backlog);
-    }
-
-    public void deleteBacklog(Integer id) {
-        Backlog backlog = getBacklogById(id);
         backlogRepository.delete(backlog);
     }
 }

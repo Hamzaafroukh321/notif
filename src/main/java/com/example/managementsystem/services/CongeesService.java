@@ -1,109 +1,122 @@
 package com.example.managementsystem.services;
 
-import com.example.managementsystem.controllers.NotificationController;
+import com.example.managementsystem.DTO.CongeDTO;
 
+import com.example.managementsystem.DTO.UserDTO;
 import com.example.managementsystem.exceptions.BadRequestException;
 import com.example.managementsystem.exceptions.NotFoundException;
-import com.example.managementsystem.models.CongeStatus;
-import com.example.managementsystem.models.Congees;
-import com.example.managementsystem.models.Notification;
-import com.example.managementsystem.models.User;
+import com.example.managementsystem.models.enums.CongeStatus;
+import com.example.managementsystem.models.entities.Congees;
+import com.example.managementsystem.notification.Notification;
+import com.example.managementsystem.models.entities.User;
+import com.example.managementsystem.notification.NotificationService;
 import com.example.managementsystem.repositories.CongeesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.example.managementsystem.mappers.CongeMapper;
 
-import java.time.LocalDateTime;
+
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class CongeesService {
-
     private final CongeesRepository congeesRepository;
-    private final NotificationController notificationController;
-
+    private final CongeMapper congeMapper;
+    private final UserService userService;
+    private final NotificationService notificationService;
 
     @Autowired
-    public CongeesService(CongeesRepository congeesRepository, NotificationController notificationController) {
+    public CongeesService(CongeesRepository congeesRepository, CongeMapper congeMapper,
+                          UserService userService, NotificationService notificationService) {
         this.congeesRepository = congeesRepository;
-        this.notificationController = notificationController;
+        this.congeMapper = congeMapper;
+        this.userService = userService;
+        this.notificationService = notificationService;
     }
 
-    public Congees createCongees(Congees congees) {
+    public CongeDTO createCongees(CongeDTO congeDTO) {
+        Congees congees = congeMapper.toEntity(congeDTO);
         congees.setStatus(CongeStatus.PENDING);
         Congees savedCongees = congeesRepository.save(congees);
-        return savedCongees;
+        return congeMapper.toDTO(savedCongees);
     }
 
+    public CongeDTO approveCongees(Long congeesId) {
+        Congees congees = congeesRepository.findById(congeesId)
+                .orElseThrow(() -> new NotFoundException("Congees request not found."));
 
-    public Congees approveCongees(Long congeesId) {
-        Optional<Congees> optionalCongees = congeesRepository.findById(congeesId);
-        if (optionalCongees.isPresent()) {
-            Congees congees = optionalCongees.get();
-            if (congees.getStatus() != CongeStatus.PENDING) {
-                throw new BadRequestException("Congees request is not in PENDING status.");
-            }
-            if (congees.getRemplacant() == null) {
-                throw new BadRequestException("Remplacant is not assigned for the congees request.");
-            }
-            congees.setStatus(CongeStatus.APPROVED);
-            Congees updatedCongees = congeesRepository.save(congees);
-            sendNotification(congees.getRequestedBy(), "Congees request approved.");
-            return updatedCongees;
+        if (congees.getStatus() != CongeStatus.PENDING) {
+            throw new BadRequestException("Congees request is not in PENDING status.");
         }
-        throw new NotFoundException("Congees request not found.");
+
+        if (congees.getRemplacant() == null) {
+            throw new BadRequestException("Remplacant is not assigned for the congees request.");
+        }
+
+        congees.setStatus(CongeStatus.APPROVED);
+        Congees updatedCongees = congeesRepository.save(congees);
+
+        sendNotification(congees.getRequestedBy(), "Congees request approved.");
+
+        return congeMapper.toDTO(updatedCongees);
     }
 
+    public CongeDTO rejectCongees(Long congeesId, String motif) {
+        Congees congees = congeesRepository.findById(congeesId)
+                .orElseThrow(() -> new NotFoundException("Congees request not found."));
 
-    public Congees rejectCongees(Long congeesId, String motif) {
-        Optional<Congees> optionalCongees = congeesRepository.findById(congeesId);
-        if (optionalCongees.isPresent()) {
-            Congees congees = optionalCongees.get();
-            if (congees.getStatus() != CongeStatus.PENDING) {
-                throw new BadRequestException("Congees request is not in PENDING status.");
-            }
-            congees.setStatus(CongeStatus.REJECTED);
-            Congees updatedCongees = congeesRepository.save(congees);
-            sendNotification(congees.getRequestedBy(), "Congees request rejected. Motif: " + motif);
-            return updatedCongees;
+        if (congees.getStatus() != CongeStatus.PENDING) {
+            throw new BadRequestException("Congees request is not in PENDING status.");
         }
-        throw new NotFoundException("Congees request not found.");
+
+        congees.setStatus(CongeStatus.REJECTED);
+        Congees updatedCongees = congeesRepository.save(congees);
+
+        sendNotification(congees.getRequestedBy(), "Congees request rejected. Motif: " + motif);
+
+        return congeMapper.toDTO(updatedCongees);
     }
 
     private void sendNotification(User user, String message) {
+        UserDTO userDTO = userService.getUserByMatricule(user.getMatricule());
+
         Notification notification = new Notification();
         notification.setMessage(message);
-        notification.setTimestamp(LocalDateTime.now());
-        notification.setRecipient(user.getEmail());
-        notificationController.sendNotification(notification);
+        notification.setRecipient(userDTO.email());
+
+        notificationService.sendNotification(notification);
     }
 
-    public Congees getCongeesById(Long id) {
-        Optional<Congees> congees = congeesRepository.findById(id);
-        return congees.orElse(null);
+    public CongeDTO getCongeesById(Long id) {
+        Congees congees = congeesRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Congees request not found."));
+        return congeMapper.toDTO(congees);
     }
 
-    public Congees updateCongees(Long id, Congees updatedCongees) {
-        Optional<Congees> optionalCongees = congeesRepository.findById(id);
-        if (optionalCongees.isPresent()) {
-            Congees existingCongees = optionalCongees.get();
-            existingCongees.setDateDebut(updatedCongees.getDateDebut());
-            existingCongees.setDateFin(updatedCongees.getDateFin());
-            existingCongees.setMotif(updatedCongees.getMotif());
-            existingCongees.setStatus(updatedCongees.getStatus());
-            existingCongees.setRequestedBy(updatedCongees.getRequestedBy());
-            existingCongees.setRemplacant(updatedCongees.getRemplacant());
-            return congeesRepository.save(existingCongees);
-        }
-        return null;
+    public CongeDTO updateCongees(Long id, CongeDTO updatedCongeDTO) {
+        Congees existingCongees = congeesRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Congees request not found."));
+
+        congeMapper.updateCongeesFromDTO(updatedCongeDTO, existingCongees);
+
+        Congees savedCongees = congeesRepository.save(existingCongees);
+        return congeMapper.toDTO(savedCongees);
     }
 
     public void deleteCongees(Long id) {
-        congeesRepository.deleteById(id);
+        Congees congees = congeesRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Congees request not found."));
+
+        congeesRepository.delete(congees);
     }
 
-    public List<Congees> getAllCongees() {
-        return congeesRepository.findAll();
+    public List<CongeDTO> getAllCongees() {
+        List<Congees> congeesList = congeesRepository.findAll();
+        return congeesList.stream()
+                .map(congeMapper::toDTO)
+                .collect(Collectors.toList());
     }
 }

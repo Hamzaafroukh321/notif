@@ -1,6 +1,6 @@
 package com.example.managementsystem.services;
 
-import com.example.managementsystem.models.User;
+import com.example.managementsystem.models.entities.User;
 import com.example.managementsystem.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;

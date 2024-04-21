@@ -1,18 +1,15 @@
 package com.example.managementsystem.controllers;
 
-import com.example.managementsystem.models.Congees;
+import com.example.managementsystem.DTO.CongeDTO;
 import com.example.managementsystem.services.CongeesService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/congees")
+@RequestMapping("/api/congees")
 public class CongeesController {
-
     private final CongeesService congeesService;
 
     @Autowired
@@ -20,42 +17,28 @@ public class CongeesController {
         this.congeesService = congeesService;
     }
 
-
-    @PreAuthorize("hasRole('MANAGER') or hasRole('TEAM_MEMBER')")
-    @PostMapping("/requests")
-    public Congees createCongees(@RequestBody Congees congees) {
-        return congeesService.createCongees(congees);
-    }
-    @PreAuthorize("hasRole('MANAGER')")
-    @PutMapping("/requests/{congeesId}/approve")
-    public ResponseEntity<Congees> approveCongees(@PathVariable Long congeesId) {
-        Congees approvedCongees = congeesService.approveCongees(congeesId);
-        return ResponseEntity.ok(approvedCongees);
-    }
-    @PreAuthorize("hasRole('MANAGER')")
-    @PutMapping("/requests/{congeesId}/reject")
-    public ResponseEntity<Congees> rejectCongees(@PathVariable Long congeesId, @RequestBody String motif) {
-        Congees rejectedCongees = congeesService.rejectCongees(congeesId, motif);
-        return ResponseEntity.ok(rejectedCongees);
+    @GetMapping
+    public List<CongeDTO> getAllCongees() {
+        return congeesService.getAllCongees();
     }
 
     @GetMapping("/{id}")
-    public Congees getCongeesById(@PathVariable Long id) {
+    public CongeDTO getCongeesById(@PathVariable Long id) {
         return congeesService.getCongeesById(id);
     }
 
+    @PostMapping
+    public CongeDTO createCongees(@RequestBody CongeDTO congeDTO) {
+        return congeesService.createCongees(congeDTO);
+    }
+
     @PutMapping("/{id}")
-    public Congees updateCongees(@PathVariable Long id, @RequestBody Congees updatedCongees) {
-        return congeesService.updateCongees(id, updatedCongees);
+    public CongeDTO updateCongees(@PathVariable Long id, @RequestBody CongeDTO congeDTO) {
+        return congeesService.updateCongees(id, congeDTO);
     }
 
     @DeleteMapping("/{id}")
     public void deleteCongees(@PathVariable Long id) {
         congeesService.deleteCongees(id);
-    }
-
-    @GetMapping
-    public List<Congees> getAllCongees() {
-        return congeesService.getAllCongees();
     }
 }

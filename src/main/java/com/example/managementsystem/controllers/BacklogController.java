@@ -1,8 +1,8 @@
 package com.example.managementsystem.controllers;
 
-import com.example.managementsystem.models.Backlog;
+import com.example.managementsystem.DTO.BacklogDTO;
 import com.example.managementsystem.services.BacklogService;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,37 +12,33 @@ import java.util.List;
 public class BacklogController {
     private final BacklogService backlogService;
 
+    @Autowired
     public BacklogController(BacklogService backlogService) {
         this.backlogService = backlogService;
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('PROJECT_MANAGER')")
-    public List<Backlog> getAllBacklogs() {
+    public List<BacklogDTO> getAllBacklogs() {
         return backlogService.getAllBacklogs();
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('PROJECT_MANAGER')")
-    public Backlog getBacklogById(@PathVariable Integer id) {
+    public BacklogDTO getBacklogById(@PathVariable Integer id) {
         return backlogService.getBacklogById(id);
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('PROJECT_MANAGER')")
-    public Backlog createBacklog(@RequestBody Backlog backlog) {
-        return backlogService.createBacklog(backlog);
+    public BacklogDTO createBacklog(@RequestBody BacklogDTO backlogDTO) {
+        return backlogService.createBacklog(backlogDTO);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('PROJECT_MANAGER')")
-    public Backlog updateBacklog(@PathVariable Integer id, @RequestBody Backlog backlogDetails) {
-        return backlogService.updateBacklog(id, backlogDetails);
+    public BacklogDTO updateBacklog(@PathVariable Integer id, @RequestBody BacklogDTO backlogDTO) {
+        return backlogService.updateBacklog(id, backlogDTO);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('PROJECT_MANAGER')")
     public void deleteBacklog(@PathVariable Integer id) {
-        backlogService.deleteBacklog(id);
+        backlogService.deleteBacklogById(id);
     }
 }

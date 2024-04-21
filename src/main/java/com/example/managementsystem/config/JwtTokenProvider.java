@@ -1,6 +1,6 @@
 package com.example.managementsystem.config;
 
-import com.example.managementsystem.models.User;
+import com.example.managementsystem.models.entities.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;

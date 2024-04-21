@@ -1,7 +1,7 @@
 package com.example.managementsystem.controllers;
 
 import com.example.managementsystem.config.JwtTokenProvider;
-import com.example.managementsystem.models.User;
+import com.example.managementsystem.models.entities.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
