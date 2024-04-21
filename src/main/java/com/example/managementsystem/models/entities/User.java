@@ -11,6 +11,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -49,8 +51,10 @@ public class User implements UserDetails {
     @NotBlank(message = "La civilité est obligatoire")
     private String civilite;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "matricule"))
     @Enumerated(EnumType.STRING)
-    private UserRole role;
+    private Set<UserRole> roles;
 
     @OneToMany(mappedBy = "requestedBy")
     private List<Congees> conges;
@@ -63,7 +67,9 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+        return roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role.name()))
+                .collect(Collectors.toList());
     }
 
     @Override

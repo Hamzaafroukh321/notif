@@ -2,6 +2,8 @@ package com.example.managementsystem.DTO;
 
 import com.example.managementsystem.models.enums.UserRole;
 
+import java.util.Set;
+
 public record UserDTO(
         Long matricule,
         String nom,
@@ -12,7 +14,7 @@ public record UserDTO(
         String adresse,
         String departement,
         String civilite,
-        UserRole role
+        Set<UserRole> roles
 ){
     public Long getMatricule() {
         return matricule;

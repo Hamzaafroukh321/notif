@@ -11,7 +11,10 @@ import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserMapper {
+    @Mapping(target = "roles", source = "user.roles")
     UserDTO toDTO(User user);
+
+    @Mapping(target = "roles", source = "userDTO.roles")
     User toEntity(UserDTO userDTO);
 
     @Mapping(target = "nom", source = "userDTO.nom")
@@ -22,12 +25,11 @@ public interface UserMapper {
     @Mapping(target = "adresse", source = "userDTO.adresse")
     @Mapping(target = "departement", source = "userDTO.departement")
     @Mapping(target = "civilite", source = "userDTO.civilite")
-    @Mapping(target = "role", source = "userDTO.role")
+    @Mapping(target = "roles", source = "userDTO.roles")
     void updateUserFromDTO(@MappingTarget User user, UserDTO userDTO);
 
     //get all users
     List<UserDTO> toDTOs(List<User> users);
     //get by matricule
-
 
 }
