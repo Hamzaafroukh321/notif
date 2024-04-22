@@ -32,12 +32,14 @@ public class UserService {
         this.userMapper = userMapper;
     }
 
+    @PreAuthorize("hasAuthority('VIEW_USERS')")
     public UserDTO getUserByMatricule(Long matricule) {
         User user = userRepository.findByMatricule(matricule)
                 .orElseThrow(() -> new NotFoundException("User not found with matricule: " + matricule));
         return userMapper.toDTO(user);
     }
-    @PreAuthorize("hasAuthority('ADMIN')")
+
+    @PreAuthorize("hasAuthority('MANAGE_USERS')")
     public UserDTO saveUser(UserDTO userDTO) {
         String password = PasswordGenerator.generatePassword();
         User user = userMapper.toEntity(userDTO);
@@ -51,6 +53,7 @@ public class UserService {
         return savedUserDTO;
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_USERS')")
     public UserDTO updateUser(Long matricule, UserDTO updatedUserDTO) {
         User existingUser = userRepository.findByMatricule(matricule)
                 .orElseThrow(() -> new NotFoundException("User not found with matricule: " + matricule));
@@ -60,6 +63,7 @@ public class UserService {
         return userMapper.toDTO(savedUser);
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_USERS')")
     public void deleteUserByMatricule(Long matricule) {
         User user = userRepository.findByMatricule(matricule)
                 .orElseThrow(() -> new NotFoundException("User not found with matricule: " + matricule));
@@ -67,6 +71,7 @@ public class UserService {
         userRepository.delete(user);
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_USERS')")
     public UserDTO saveAndFlushUser(UserDTO userDTO) {
         User user = userMapper.toEntity(userDTO);
         User savedUser = userRepository.saveAndFlush(user);
@@ -83,6 +88,7 @@ public class UserService {
         emailService.sendEmail(to, subject, text);
     }
 
+    @PreAuthorize("hasAuthority('VIEW_USERS')")
     public List<UserDTO> getAllUsers() {
         List<User> users = userRepository.findAll();
         return userMapper.toDTOs(users);

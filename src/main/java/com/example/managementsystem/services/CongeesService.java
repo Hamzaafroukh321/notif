@@ -12,6 +12,7 @@ import com.example.managementsystem.models.entities.User;
 import com.example.managementsystem.notification.NotificationService;
 import com.example.managementsystem.repositories.CongeesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.managementsystem.mappers.CongeMapper;
@@ -37,6 +38,7 @@ public class CongeesService {
         this.notificationService = notificationService;
     }
 
+    @PreAuthorize("hasAnyAuthority('REQUEST_LEAVE')")
     public CongeDTO createCongees(CongeDTO congeDTO) {
         Congees congees = congeMapper.toEntity(congeDTO);
         congees.setStatus(CongeStatus.PENDING);
@@ -44,6 +46,7 @@ public class CongeesService {
         return congeMapper.toDTO(savedCongees);
     }
 
+    @PreAuthorize("hasAuthority('APPROVE_LEAVE')")
     public CongeDTO approveCongees(Long congeesId) {
         Congees congees = congeesRepository.findById(congeesId)
                 .orElseThrow(() -> new NotFoundException("Congees request not found."));
@@ -64,6 +67,7 @@ public class CongeesService {
         return congeMapper.toDTO(updatedCongees);
     }
 
+    @PreAuthorize("hasAuthority('APPROVE_LEAVE')")
     public CongeDTO rejectCongees(Long congeesId, String motif) {
         Congees congees = congeesRepository.findById(congeesId)
                 .orElseThrow(() -> new NotFoundException("Congees request not found."));
@@ -90,12 +94,14 @@ public class CongeesService {
         notificationService.sendNotification(notification);
     }
 
+    @PreAuthorize("hasAnyAuthority('REQUEST_LEAVE', 'APPROVE_LEAVE')")
     public CongeDTO getCongeesById(Long id) {
         Congees congees = congeesRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Congees request not found."));
         return congeMapper.toDTO(congees);
     }
 
+    @PreAuthorize("hasAnyAuthority('REQUEST_LEAVE', 'APPROVE_LEAVE')")
     public CongeDTO updateCongees(Long id, CongeDTO updatedCongeDTO) {
         Congees existingCongees = congeesRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Congees request not found."));
@@ -106,6 +112,7 @@ public class CongeesService {
         return congeMapper.toDTO(savedCongees);
     }
 
+    @PreAuthorize("hasAnyAuthority('REQUEST_LEAVE', 'APPROVE_LEAVE')")
     public void deleteCongees(Long id) {
         Congees congees = congeesRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Congees request not found."));
@@ -113,6 +120,7 @@ public class CongeesService {
         congeesRepository.delete(congees);
     }
 
+    @PreAuthorize("hasAnyAuthority('REQUEST_LEAVE', 'APPROVE_LEAVE')")
     public List<CongeDTO> getAllCongees() {
         List<Congees> congeesList = congeesRepository.findAll();
         return congeesList.stream()

@@ -4,6 +4,7 @@ import com.example.managementsystem.exceptions.NotFoundException;
 import com.example.managementsystem.models.entities.Sprint;
 import com.example.managementsystem.repositories.SprintRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.managementsystem.DTO.SprintDTO;
@@ -26,6 +27,7 @@ public class SprintService {
         this.projetService = projetService;
     }
 
+    @PreAuthorize("hasAnyAuthority('VIEW_PROJECT_PROGRESS', 'MANAGE_SPRINTS')")
     public List<SprintDTO> getAllSprints() {
         List<Sprint> sprints = sprintRepository.findAll();
         return sprints.stream()
@@ -33,12 +35,14 @@ public class SprintService {
                 .collect(Collectors.toList());
     }
 
+    @PreAuthorize("hasAnyAuthority('VIEW_PROJECT_PROGRESS', 'MANAGE_SPRINTS')")
     public SprintDTO getSprintById(Long id) {
         Sprint sprint = sprintRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Sprint not found with id: " + id));
         return sprintMapper.toDTO(sprint);
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_SPRINTS')")
     public SprintDTO createSprint(SprintDTO sprintDTO) {
         projetService.getProjetById(sprintDTO.projetId());
 
@@ -47,10 +51,10 @@ public class SprintService {
         return sprintMapper.toDTO(savedSprint);
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_SPRINTS')")
     public SprintDTO updateSprint(Long id, SprintDTO updatedSprintDTO) {
         Sprint existingSprint = sprintRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Sprint not found with id: " + id));
-
 
         projetService.getProjetById(updatedSprintDTO.projetId());
 
@@ -59,6 +63,7 @@ public class SprintService {
         return sprintMapper.toDTO(savedSprint);
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_SPRINTS')")
     public void deleteSprintById(Long id) {
         Sprint sprint = sprintRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Sprint not found with id: " + id));

@@ -23,13 +23,13 @@ public class JwtTokenProvider {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expirationTime);
 
-        List<String> roles = user.getAuthorities().stream()
+        List<String> authorities = user.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
         return Jwts.builder()
                 .setSubject(user.getEmail())
-                .claim("roles", roles)
+                .claim("authorities", authorities)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(SignatureAlgorithm.HS512, secretKey)
@@ -49,7 +49,7 @@ public class JwtTokenProvider {
         }
     }
 
-    public List<String> getRolesFromToken(String token) {
-        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().get("roles", List.class);
+    public List<String> getAuthoritiesFromToken(String token) {
+        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().get("authorities", List.class);
     }
 }

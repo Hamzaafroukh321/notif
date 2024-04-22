@@ -6,6 +6,7 @@ import com.example.managementsystem.mappers.UserStoryMapper;
 import com.example.managementsystem.models.entities.UserStory;
 import com.example.managementsystem.repositories.UserStoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,7 @@ public class UserStoryService {
         this.backlogService = backlogService;
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_TASKS')")
     public UserStoryDTO createUserStory(UserStoryDTO userStoryDTO) {
         // Vérifier si le backlog existe
         backlogService.getBacklogById(userStoryDTO.backlogId());
@@ -36,12 +38,14 @@ public class UserStoryService {
         return userStoryMapper.toDTO(savedUserStory);
     }
 
+    @PreAuthorize("hasAnyAuthority('VIEW_ASSIGNED_TASKS', 'MANAGE_TASKS')")
     public UserStoryDTO getUserStoryById(Long id) {
         UserStory userStory = userStoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User story not found with id: " + id));
         return userStoryMapper.toDTO(userStory);
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_TASKS')")
     public UserStoryDTO updateUserStory(Long id, UserStoryDTO updatedUserStoryDTO) {
         UserStory existingUserStory = userStoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User story not found with id: " + id));
@@ -55,6 +59,7 @@ public class UserStoryService {
         return userStoryMapper.toDTO(savedUserStory);
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_TASKS')")
     public void deleteUserStory(Long id) {
         UserStory userStory = userStoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User story not found with id: " + id));
@@ -62,6 +67,7 @@ public class UserStoryService {
         userStoryRepository.delete(userStory);
     }
 
+    @PreAuthorize("hasAnyAuthority('VIEW_ASSIGNED_TASKS', 'MANAGE_TASKS')")
     public List<UserStoryDTO> getAllUserStories() {
         List<UserStory> userStories = userStoryRepository.findAll();
         return userStories.stream()

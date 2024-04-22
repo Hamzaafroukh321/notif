@@ -6,6 +6,7 @@ import com.example.managementsystem.mappers.BacklogMapper;
 import com.example.managementsystem.models.entities.Backlog;
 import com.example.managementsystem.repositories.BacklogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,18 +25,21 @@ public class BacklogService {
         this.backlogMapper = backlogMapper;
         this.projetService = projetService;
     }
-    // Get all backlogs
 
+    @PreAuthorize("hasAuthority('MANAGE_TASKS')")
     public List<BacklogDTO> getAllBacklogs() {
         List<Backlog> backlogs = backlogRepository.findAll();
         return backlogMapper.toDTOs(backlogs);
     }
+
+    @PreAuthorize("hasAuthority('MANAGE_TASKS')")
     public BacklogDTO getBacklogById(Integer id) {
         Backlog backlog = backlogRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Backlog not found with id: " + id));
         return backlogMapper.toDTO(backlog);
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_TASKS')")
     public BacklogDTO createBacklog(BacklogDTO backlogDTO) {
         // Vérifier si le projet existe
         projetService.getProjetById(backlogDTO.projetId());
@@ -45,6 +49,7 @@ public class BacklogService {
         return backlogMapper.toDTO(savedBacklog);
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_TASKS')")
     public BacklogDTO updateBacklog(Integer id, BacklogDTO updatedBacklogDTO) {
         Backlog existingBacklog = backlogRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Backlog not found with id: " + id));
@@ -57,6 +62,7 @@ public class BacklogService {
         return backlogMapper.toDTO(savedBacklog);
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_TASKS')")
     public void deleteBacklogById(Integer id) {
         Backlog backlog = backlogRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Backlog not found with id: " + id));

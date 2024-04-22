@@ -7,6 +7,7 @@ import com.example.managementsystem.models.entities.Projet;
 import com.example.managementsystem.models.entities.User;
 import com.example.managementsystem.repositories.ProjetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.managementsystem.mappers.ProjetMapper;
@@ -19,7 +20,6 @@ import java.util.List;
 @Transactional
 public class ProjetService {
     private final ProjetRepository projetRepository;
-
     private final UserRepository userRepository;
     private final ProjetMapper projetMapper;
     private final UserService userService;
@@ -32,17 +32,20 @@ public class ProjetService {
         this.userService = userService;
     }
 
+    @PreAuthorize("hasAnyAuthority('VIEW_PROJECT_PROGRESS', 'MANAGE_PROJECTS')")
     public List<ProjetDTO> getAllProjets() {
         List<Projet> projets = projetRepository.findAll();
         return projetMapper.toDTOs(projets);
     }
 
+    @PreAuthorize("hasAnyAuthority('VIEW_PROJECT_PROGRESS', 'MANAGE_PROJECTS')")
     public ProjetDTO getProjetById(Long id) {
         Projet projet = projetRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Projet not found with id: " + id));
         return projetMapper.toDTO(projet);
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_PROJECTS')")
     public ProjetDTO createProjet(ProjetDTO projetDTO) {
         userService.getUserByMatricule(projetDTO.chefMatricule());
 
@@ -54,6 +57,7 @@ public class ProjetService {
         return projetMapper.toDTO(savedProjet);
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_PROJECTS')")
     public ProjetDTO updateProjet(Long id, ProjetDTO updatedProjetDTO) {
         Projet existingProjet = projetRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Projet not found with id: " + id));
@@ -66,6 +70,7 @@ public class ProjetService {
         return projetMapper.toDTO(savedProjet);
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_PROJECTS')")
     public void deleteProjetById(Long id) {
         Projet projet = projetRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Projet not found with id: " + id));

@@ -34,6 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.jwtTokenProvider = jwtTokenProvider;
         this.userDetailsService = userDetailsService;
     }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
@@ -42,13 +43,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String userEmail = jwtTokenProvider.getUserEmailFromToken(token);
             UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
-            List<String> roles = jwtTokenProvider.getRolesFromToken(token);
-            Collection<? extends GrantedAuthority> authorities = roles.stream()
+            List<String> authorities = jwtTokenProvider.getAuthoritiesFromToken(token);
+            Collection<? extends GrantedAuthority> grantedAuthorities = authorities.stream()
                     .map(SimpleGrantedAuthority::new)
                     .collect(Collectors.toList());
 
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    userDetails, null, authorities);
+                    userDetails, null, grantedAuthorities);
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }

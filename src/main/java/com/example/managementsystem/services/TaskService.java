@@ -10,6 +10,7 @@ import com.example.managementsystem.notification.Notification;
 import com.example.managementsystem.repositories.TaskRepository;
 import com.example.managementsystem.notification.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +36,7 @@ public class TaskService {
         this.notificationService = notificationService;
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_TASKS')")
     public TaskDTO createTask(TaskDTO taskDTO) {
         // Vérifier si le sprint et l'utilisateur assigné existent
         sprintService.getSprintById(taskDTO.sprintId());
@@ -49,12 +51,14 @@ public class TaskService {
         return savedTaskDTO;
     }
 
+    @PreAuthorize("hasAnyAuthority('VIEW_ASSIGNED_TASKS', 'MANAGE_TASKS')")
     public TaskDTO getTaskById(Long id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Tâche non trouvée avec l'ID : " + id));
         return taskMapper.toDTO(task);
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_TASKS')")
     public TaskDTO updateTask(Long id, TaskDTO updatedTaskDTO) {
         Task existingTask = taskRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Tâche non trouvée avec l'ID : " + id));
@@ -72,6 +76,7 @@ public class TaskService {
         return savedTaskDTO;
     }
 
+    @PreAuthorize("hasAnyAuthority('UPDATE_TASK_STATUS', 'MANAGE_TASKS')")
     public TaskDTO updateTaskStatus(Long id, TaskStatus status) {
         Task existingTask = taskRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Tâche non trouvée avec l'ID : " + id));
@@ -85,6 +90,7 @@ public class TaskService {
         return savedTaskDTO;
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_TASKS')")
     public void deleteTask(Long id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Tâche non trouvée avec l'ID : " + id));
@@ -95,6 +101,7 @@ public class TaskService {
         sendNotificationToAssignedUser(deletedTaskDTO, "Tâche supprimée : " + deletedTaskDTO.description());
     }
 
+    @PreAuthorize("hasAnyAuthority('VIEW_ASSIGNED_TASKS', 'MANAGE_TASKS')")
     public List<TaskDTO> getAllTasks() {
         List<Task> tasks = taskRepository.findAll();
         return tasks.stream()
