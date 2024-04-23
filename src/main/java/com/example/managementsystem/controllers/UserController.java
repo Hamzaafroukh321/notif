@@ -31,6 +31,13 @@ public class UserController {
         return userService.getUserByMatricule(matricule);
     }
 
+    // update user
+
+    @PutMapping("/{matricule}")
+    public UserDTO updateUser(@PathVariable Long matricule, @RequestBody UserDTO updatedUserDTO) {
+        return userService.updateUser(matricule, updatedUserDTO);
+    }
+
     @DeleteMapping("/{matricule}")
     public void deleteUserByMatricule(@PathVariable Long matricule) {
         userService.deleteUserByMatricule(matricule);

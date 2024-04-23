@@ -20,7 +20,7 @@ import java.util.Map;
 @Component
 public class LoggingAspect {
 
-    private final Logger logger = LoggerFactory.getLogger(LoggingAspect.class);
+    private static final Logger logger = LoggerFactory.getLogger(LoggingAspect.class);
 
     @Pointcut("execution(* com.example.managementsystem.controllers.AuthController.authenticateUser(..))")
     public void authenticationMethod() {}
@@ -62,6 +62,65 @@ public class LoggingAspect {
             }
         }
     }
+
+    // UserService
+    @AfterReturning(pointcut = "execution(* com.example.managementsystem.services.UserService.getUserByMatricule(..))", returning = "result")
+    public void logGetUserByMatricule(JoinPoint joinPoint, Object result) {
+        logger.info("User retrieved successfully with matricule: {}", joinPoint.getArgs()[0]);
+    }
+
+    // ... (autres méthodes de UserService)
+
+    // ProjetService
+    @AfterReturning(pointcut = "execution(* com.example.managementsystem.services.ProjetService.getAllProjets(..))", returning = "result")
+    public void logGetAllProjets(JoinPoint joinPoint, Object result) {
+        logger.info("All projects retrieved successfully");
+    }
+
+    // ... (autres méthodes de ProjetService)
+
+    // SprintService
+    @AfterReturning(pointcut = "execution(* com.example.managementsystem.services.SprintService.getAllSprints(..))", returning = "result")
+    public void logGetAllSprints(JoinPoint joinPoint, Object result) {
+        logger.info("All sprints retrieved successfully");
+    }
+
+    // ... (autres méthodes de SprintService)
+
+    // BacklogService
+    @AfterReturning(pointcut = "execution(* com.example.managementsystem.services.BacklogService.getAllBacklogs(..))", returning = "result")
+    public void logGetAllBacklogs(JoinPoint joinPoint, Object result) {
+        logger.info("All backlogs retrieved successfully");
+    }
+
+    // ... (autres méthodes de BacklogService)
+
+    // TaskService
+    @AfterReturning(pointcut = "execution(* com.example.managementsystem.services.TaskService.createTask(..))", returning = "result")
+    public void logCreateTask(JoinPoint joinPoint, Object result) {
+        TaskDTO taskDTO = (TaskDTO) result;
+        logger.info("Task created successfully: {}", taskDTO.description());
+    }
+
+    // ... (autres méthodes de TaskService)
+
+    // CongeesService
+    @AfterReturning(pointcut = "execution(* com.example.managementsystem.services.CongeesService.createCongees(..))", returning = "result")
+    public void logCreateCongees(JoinPoint joinPoint, Object result) {
+        CongeDTO congeDTO = (CongeDTO) result;
+        logger.info("Congees request created successfully by user with matricule: {}", congeDTO.requestedByMatricule());
+    }
+
+    // ... (autres méthodes de CongeesService)
+
+    // UserStoryService
+    @AfterReturning(pointcut = "execution(* com.example.managementsystem.services.UserStoryService.createUserStory(..))", returning = "result")
+    public void logCreateUserStory(JoinPoint joinPoint, Object result) {
+        UserStoryDTO userStoryDTO = (UserStoryDTO) result;
+        logger.info("User story created successfully with ID: {}", userStoryDTO.id());
+    }
+
+    // ... (autres méthodes de UserStoryService)
 
     @AfterReturning(pointcut = "userServiceMethods()", returning = "result")
     public void logUserServiceMethod(JoinPoint joinPoint, Object result) {

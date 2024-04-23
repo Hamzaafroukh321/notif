@@ -62,8 +62,7 @@ public class User implements UserDetails {
     @ManyToMany(mappedBy = "teamMembers")
     private List<Projet> projets;
 
-    @OneToOne(mappedBy = "user")
-    private UserProfile userProfile;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

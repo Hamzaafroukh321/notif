@@ -58,7 +58,12 @@ public class UserService {
         User existingUser = userRepository.findByMatricule(matricule)
                 .orElseThrow(() -> new NotFoundException("User not found with matricule: " + matricule));
 
-        userMapper.updateUserFromDTO(existingUser, updatedUserDTO);
+        // Mettez à jour uniquement les champs spécifiques de l'entité User existante
+        existingUser.setNom(updatedUserDTO.nom());
+        existingUser.setPrenom(updatedUserDTO.prenom());
+        existingUser.setEmail(updatedUserDTO.email());
+        // Mettez à jour les autres champs si nécessaire
+
         User savedUser = userRepository.save(existingUser);
         return userMapper.toDTO(savedUser);
     }
