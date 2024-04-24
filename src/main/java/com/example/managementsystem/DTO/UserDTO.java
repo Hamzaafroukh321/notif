@@ -1,6 +1,6 @@
 package com.example.managementsystem.DTO;
 
-import com.example.managementsystem.models.enums.UserRole;
+import com.example.managementsystem.models.entities.UserRole;
 
 import java.util.Set;
 

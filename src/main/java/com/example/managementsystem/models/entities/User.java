@@ -1,6 +1,5 @@
 package com.example.managementsystem.models.entities;
 
-import com.example.managementsystem.models.enums.UserRole;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -14,46 +13,48 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Entity
 @Getter
 @Setter
-@Entity
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
     @SequenceGenerator(name = "user_seq", initialValue = 10000, allocationSize = 1)
     private Long matricule;
 
-    @NotBlank(message = "Le nom est obligatoire")
+
     private String nom;
 
-    @NotBlank(message = "Le prénom est obligatoire")
-    private String prenom;
-    // on doit pas avoir deux emails identiques
 
-    @Column(nullable = false, unique = true)
+    private String prenom;
+
+
     private String emailpersonnel;
 
-    @Column(nullable = false)
+
     private String email;
 
-    @Column(nullable = false)
+
     private String password;
 
-    @NotBlank(message = "Le numéro de téléphone est obligatoire")
+
     private String tel;
 
-    @NotBlank(message = "L'adresse est obligatoire")
+
     private String adresse;
 
-    @NotBlank(message = "Le département est obligatoire")
+
     private String departement;
 
-    @NotBlank(message = "La civilité est obligatoire")
+
     private String civilite;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "matricule"))
-    @Enumerated(EnumType.STRING)
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
     private Set<UserRole> roles;
 
     @OneToMany(mappedBy = "requestedBy")
@@ -62,13 +63,14 @@ public class User implements UserDetails {
     @ManyToMany(mappedBy = "teamMembers")
     private List<Projet> projets;
 
-
+    @Column(nullable = false)
+    private boolean firstTime = true;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()
                 .flatMap(role -> role.getPermissions().stream())
-                .map(permission -> new SimpleGrantedAuthority(permission.name()))
+                .map(permission -> new SimpleGrantedAuthority(permission.getName()))
                 .collect(Collectors.toList());
     }
 
