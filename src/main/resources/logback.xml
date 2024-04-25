@@ -28,7 +28,7 @@
             <onMismatch>DENY</onMismatch>
         </filter>
     </appender>
-   //je veux que les except_ions soient pas affiche dans file_user_actions
+
 
     <appender name="FILE_USER_ACTIONS" class="ch.qos.logback.core.FileAppender">
         <file>logs/user-actions.log</file>

@@ -11,6 +11,7 @@ import com.example.managementsystem.notification.Notification;
 import com.example.managementsystem.models.entities.User;
 import com.example.managementsystem.notification.NotificationService;
 import com.example.managementsystem.repositories.CongeesRepository;
+import com.example.managementsystem.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -28,24 +29,31 @@ public class CongeesService {
     private final CongeMapper congeMapper;
     private final UserService userService;
     private final NotificationService notificationService;
+    private final UserRepository userRepository;
 
     @Autowired
     public CongeesService(CongeesRepository congeesRepository, CongeMapper congeMapper,
-                          UserService userService, NotificationService notificationService) {
+                          UserService userService, NotificationService notificationService, UserRepository userRepository) {
         this.congeesRepository = congeesRepository;
         this.congeMapper = congeMapper;
         this.userService = userService;
         this.notificationService = notificationService;
+        this.userRepository = userRepository;
     }
+
 
     @PreAuthorize("hasAnyAuthority('REQUEST_LEAVE')")
     public CongeDTO createCongees(CongeDTO congeDTO) {
+        User remplacant = userService.getUserEntityByMatricule(congeDTO.remplacantMatricule());
+        if (remplacant.getMatricule() == null) {
+            remplacant = userRepository.save(remplacant);
+        }
         Congees congees = congeMapper.toEntity(congeDTO);
+        congees.setRemplacant(remplacant);
         congees.setStatus(CongeStatus.PENDING);
         Congees savedCongees = congeesRepository.save(congees);
         return congeMapper.toDTO(savedCongees);
     }
-
     @PreAuthorize("hasAuthority('APPROVE_LEAVE')")
     public CongeDTO approveCongees(Long congeesId) {
         Congees congees = congeesRepository.findById(congeesId)

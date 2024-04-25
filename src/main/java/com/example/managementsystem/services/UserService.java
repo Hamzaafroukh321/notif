@@ -97,4 +97,9 @@ public class UserService {
         List<User> users = userRepository.findAll();
         return userMapper.toDTOs(users);
     }
+
+    public User getUserEntityByMatricule(Long matricule) {
+        return userRepository.findByMatricule(matricule)
+                .orElseThrow(() -> new NotFoundException("User not found with matricule: " + matricule));
+    }
 }
