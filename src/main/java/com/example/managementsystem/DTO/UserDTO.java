@@ -1,7 +1,5 @@
 package com.example.managementsystem.DTO;
 
-import com.example.managementsystem.models.entities.UserRole;
-
 import java.util.Set;
 
 public record UserDTO(
@@ -14,9 +12,14 @@ public record UserDTO(
         String adresse,
         String departement,
         String civilite,
-        Set<UserRole> roles
+        Set<String> roles
 ){
     public Long getMatricule() {
         return matricule;
     }
+
+    // getRoles Set<String> roles
+
+
+
 }

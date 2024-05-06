@@ -2,6 +2,7 @@ package com.example.managementsystem.controllers;
 
 import com.example.managementsystem.DTO.AuditDTO;
 import com.example.managementsystem.services.AuditService;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,6 +36,14 @@ public class AuditController {
     public ResponseEntity<List<AuditDTO>> getAuditsByMonth(@PathVariable String date) {
         LocalDate month = LocalDate.parse(date);
         List<AuditDTO> audits = auditService.getAuditsByMonth(month);
+        return ResponseEntity.ok(audits);
+    }
+
+    @GetMapping("/range")
+    public ResponseEntity<List<AuditDTO>> getAuditsByDateRange(
+            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        List<AuditDTO> audits = auditService.getAuditsByDateRange(startDate, endDate);
         return ResponseEntity.ok(audits);
     }
 }

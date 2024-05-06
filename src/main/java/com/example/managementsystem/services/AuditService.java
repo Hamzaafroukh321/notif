@@ -61,4 +61,14 @@ public class AuditService {
         Audit audit = auditMapper.auditDTOToAudit(auditDTO);
         auditRepository.save(audit);
     }
+
+    public List<AuditDTO> getAuditsByDateRange(LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(23, 59, 59);
+
+        List<Audit> audits = auditRepository.findByTimestampBetween(startDateTime, endDateTime);
+        return audits.stream()
+                .map(auditMapper::auditToAuditDTO)
+                .collect(Collectors.toList());
+    }
 }

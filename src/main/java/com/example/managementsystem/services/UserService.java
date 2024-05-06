@@ -5,39 +5,51 @@ import com.example.managementsystem.config.PasswordGenerator;
 import com.example.managementsystem.exceptions.NotFoundException;
 import com.example.managementsystem.mappers.UserMapper;
 import com.example.managementsystem.models.entities.User;
+import com.example.managementsystem.models.entities.UserRole;
 import com.example.managementsystem.repositories.UserRepository;
+import com.example.managementsystem.repositories.UserRoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 @Service
 @Transactional
 public class UserService {
     private final UserRepository userRepository;
+
+    private final UserRoleRepository userRoleRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final UserMapper userMapper;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, EmailService emailService, UserMapper userMapper) {
+    public UserService(UserRepository userRepository, UserRoleRepository userRoleRepository, PasswordEncoder passwordEncoder, EmailService emailService, UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.userRoleRepository = userRoleRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
         this.userMapper = userMapper;
     }
 
-    @PreAuthorize("hasAuthority('VIEW_USERS')")
+    @PreAuthorize("hasAuthority('MANAGE_USERS')")
     public UserDTO getUserByMatricule(Long matricule) {
         User user = userRepository.findByMatricule(matricule)
                 .orElseThrow(() -> new NotFoundException("User not found with matricule: " + matricule));
         return userMapper.toDTO(user);
     }
+
+
 
     @PreAuthorize("hasAuthority('MANAGE_USERS')")
     public UserDTO saveUser(UserDTO userDTO) {
@@ -45,10 +57,18 @@ public class UserService {
         User user = userMapper.toEntity(userDTO);
         user.setPassword(passwordEncoder.encode(password));
 
+        Set<UserRole> userRoles = new HashSet<>();
+        for (String roleName : userDTO.roles()) {
+            UserRole role = userRoleRepository.findByName(roleName)
+                    .orElseThrow(() -> new NotFoundException("Role not found with name: " + roleName));
+            userRoles.add(role);
+        }
+        user.setRoles(userRoles);
+
         User savedUser = userRepository.save(user);
         UserDTO savedUserDTO = userMapper.toDTO(savedUser);
 
-        //sendNewUserEmail(savedUserDTO, password);
+        sendNewUserEmail(savedUserDTO, password);
 
         return savedUserDTO;
     }
@@ -58,10 +78,20 @@ public class UserService {
         User existingUser = userRepository.findByMatricule(matricule)
                 .orElseThrow(() -> new NotFoundException("User not found with matricule: " + matricule));
 
-
         existingUser.setNom(updatedUserDTO.nom());
         existingUser.setPrenom(updatedUserDTO.prenom());
+        existingUser.setDepartement(updatedUserDTO.departement());
+        existingUser.setEmailpersonnel(updatedUserDTO.emailpersonnel());
+        existingUser.setEmail(updatedUserDTO.email());
+        existingUser.setTel(updatedUserDTO.tel());
 
+        Set<UserRole> userRoles = new HashSet<>();
+        for (String roleName : updatedUserDTO.roles()) {
+            UserRole role = userRoleRepository.findByName(roleName)
+                    .orElseThrow(() -> new NotFoundException("Role not found with name: " + roleName));
+            userRoles.add(role);
+        }
+        existingUser.setRoles(userRoles);
 
         User savedUser = userRepository.save(existingUser);
         return userMapper.toDTO(savedUser);
@@ -92,14 +122,40 @@ public class UserService {
         emailService.sendEmail(to, subject, text);
     }
 
-    @PreAuthorize("hasAuthority('VIEW_USERS')")
-    public List<UserDTO> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        return userMapper.toDTOs(users);
+    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    public Page<UserDTO> getAllUsers(Pageable pageable) {
+        Page<User> users = userRepository.findAll(pageable);
+        return users.map(userMapper::toDTO);
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    public long getTotalUsers() {
+        return userRepository.count();
+    }
+
+    @PreAuthorize("hasAuthority('VIEW_USERS')")
     public User getUserEntityByMatricule(Long matricule) {
         return userRepository.findByMatricule(matricule)
                 .orElseThrow(() -> new NotFoundException("User not found with matricule: " + matricule));
+    }
+
+    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    public Page<UserDTO> searchUsers(String nom, String prenom, Long matricule, Pageable pageable) {
+        Specification<User> spec = Specification.where(null);
+
+        if (nom != null && !nom.isEmpty()) {
+            spec = spec.and(UserSpecification.searchByNom(nom));
+        }
+
+        if (prenom != null && !prenom.isEmpty()) {
+            spec = spec.and(UserSpecification.searchByPrenom(prenom));
+        }
+
+        if (matricule != null) {
+            spec = spec.and(UserSpecification.searchByMatricule(matricule));
+        }
+
+        Page<User> users = userRepository.findAll(spec, pageable);
+        return users.map(userMapper::toDTO);
     }
 }

@@ -33,6 +33,7 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) throws Exception {
         // Créer les permissions
         Permission manageUsers = createPermissionIfNotExists("MANAGE_USERS");
+        Permission viewUsers = createPermissionIfNotExists("VIEW_USERS");
         Permission resetPassword = createPermissionIfNotExists("RESET_PASSWORD");
         Permission manageProjects = createPermissionIfNotExists("MANAGE_PROJECTS");
         Permission manageTeams = createPermissionIfNotExists("MANAGE_TEAMS");
@@ -47,13 +48,15 @@ public class DataInitializer implements CommandLineRunner {
         Permission viewActiveSprint = createPermissionIfNotExists("VIEW_ACTIVE_SPRINT");
 
 
+
         // Créer les rôles utilisateur avec leurs permissions par défaut
-        createUserRoleIfNotExists("ADMIN", Set.of(manageUsers, resetPassword));
+        createUserRoleIfNotExists("ADMIN", Set.of(manageUsers, resetPassword, viewUsers));
         createUserRoleIfNotExists("MANAGER", Set.of(manageProjects, manageTeams, viewProjectProgress, manageSprints, approveLeave));
         createUserRoleIfNotExists("PROJECT_MANAGER", Set.of(manageTasks, viewProjectProgress, manageSprints, requestLeave));
         createUserRoleIfNotExists("TEAM_MEMBER", Set.of(viewAssignedTasks, updateTaskStatus, submitTask, viewActiveSprint, requestLeave));
 
         createUserIfNotExists("admin", "password123", "admin@example.com", "adminpersonnel@example.com", "ADMIN");
+        createUserIfNotExists("admin2", "password123", "admin2@example.com", "adminpersonnel2@example.com", "ADMIN");
         createUserIfNotExists("manager", "password123", "manager@example.com", "managerpersonnel@example.com", "MANAGER");
         createUserIfNotExists("project_manager", "password123", "project_manager@example.com", "projectmanagerpersonnel@example.com", "PROJECT_MANAGER");
         createUserIfNotExists("team_member", "password123", "team_member@example.com", "teammemberpersonnel@example.com", "TEAM_MEMBER");
