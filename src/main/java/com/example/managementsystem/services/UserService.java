@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -42,7 +44,7 @@ public class UserService {
         this.userMapper = userMapper;
     }
 
-    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+   @PreAuthorize("hasAuthority('VIEW_USERS')")
     public UserDTO getUserByMatricule(Long matricule) {
         User user = userRepository.findByMatricule(matricule)
                 .orElseThrow(() -> new NotFoundException("User not found with matricule: " + matricule));
@@ -50,8 +52,13 @@ public class UserService {
     }
 
 
+    public List<UserDTO> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return users.stream().map(userMapper::toDTO).collect(Collectors.toList());
+    }
 
-    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+
+
     public UserDTO saveUser(UserDTO userDTO) {
         String password = PasswordGenerator.generatePassword();
         User user = userMapper.toEntity(userDTO);
@@ -73,7 +80,7 @@ public class UserService {
         return savedUserDTO;
     }
 
-    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+
     public UserDTO updateUser(Long matricule, UserDTO updatedUserDTO) {
         User existingUser = userRepository.findByMatricule(matricule)
                 .orElseThrow(() -> new NotFoundException("User not found with matricule: " + matricule));
@@ -97,7 +104,7 @@ public class UserService {
         return userMapper.toDTO(savedUser);
     }
 
-    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+
     public void deleteUserByMatricule(Long matricule) {
         User user = userRepository.findByMatricule(matricule)
                 .orElseThrow(() -> new NotFoundException("User not found with matricule: " + matricule));
@@ -105,7 +112,7 @@ public class UserService {
         userRepository.delete(user);
     }
 
-    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+
     public UserDTO saveAndFlushUser(UserDTO userDTO) {
         User user = userMapper.toEntity(userDTO);
         User savedUser = userRepository.saveAndFlush(user);
@@ -122,24 +129,24 @@ public class UserService {
         emailService.sendEmail(to, subject, text);
     }
 
-    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+
     public Page<UserDTO> getAllUsers(Pageable pageable) {
         Page<User> users = userRepository.findAll(pageable);
         return users.map(userMapper::toDTO);
     }
 
-    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+
     public long getTotalUsers() {
         return userRepository.count();
     }
 
-    @PreAuthorize("hasAuthority('VIEW_USERS')")
+
     public User getUserEntityByMatricule(Long matricule) {
         return userRepository.findByMatricule(matricule)
                 .orElseThrow(() -> new NotFoundException("User not found with matricule: " + matricule));
     }
 
-    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+
     public Page<UserDTO> searchUsers(String nom, String prenom, Long matricule, Pageable pageable) {
         Specification<User> spec = Specification.where(null);
 
@@ -158,4 +165,26 @@ public class UserService {
         Page<User> users = userRepository.findAll(spec, pageable);
         return users.map(userMapper::toDTO);
     }
+
+
+    public List<Long> getAllUsersMatricules() {
+        List<Long> users = userRepository.findAllMatricule();
+        return users;
+    }
+
+    //get user with role : PROJECT_MANAGER
+
+    public List<UserDTO> getUserByRole(String roleName) {
+        UserRole role = userRoleRepository.findByName(roleName)
+                .orElseThrow(() -> new NotFoundException("Role not found with name: " + roleName));
+        List<User> users = userRepository.findAllByRoleName(roleName);
+        return users.stream().map(userMapper::toDTO).collect(Collectors.toList());
+    }
+
+
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
+
 }

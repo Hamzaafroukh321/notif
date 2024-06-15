@@ -13,6 +13,8 @@ public class Backlog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String titre;
+
+    @Column(columnDefinition = "TEXT")
     private String description;
     private String etat;
 
@@ -20,6 +22,17 @@ public class Backlog {
     @JoinColumn(name = "projet_id")
     private Projet projet;
 
-    @OneToMany(mappedBy = "backlog")
+    @OneToMany(mappedBy = "backlog", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserStory> userStories;
+
+    @Override
+    public String toString() {
+        return "Backlog{" +
+                "id=" + id +
+                ", titre='" + titre + '\'' +
+                ", description='" + description + '\'' +
+                ", etat='" + etat + '\'' +
+                ", projetId=" + projet +
+                '}';
+    }
 }

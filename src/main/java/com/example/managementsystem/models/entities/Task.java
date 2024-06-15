@@ -12,6 +12,9 @@ public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String description;
     @Enumerated(EnumType.STRING)
     private TaskStatus status;
@@ -21,6 +24,15 @@ public class Task {
     private Sprint sprint;
 
     @ManyToOne
-    @JoinColumn(name = "user_matricule", insertable = false, updatable = false)
+    @JoinColumn(name = "user_matricule")
     private User assignedTo;
+
+    @Override
+    public String toString() {
+        return "Task{" +
+                "id=" + id +
+                ", description='" + description + '\'' +
+                ", status=" + status +
+                '}';
+    }
 }

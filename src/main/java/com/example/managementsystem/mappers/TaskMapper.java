@@ -9,6 +9,7 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface TaskMapper {
+
     @Mapping(source = "sprint.id", target = "sprintId")
     @Mapping(source = "assignedTo.matricule", target = "assignedToMatricule")
     TaskDTO toDTO(Task task);
@@ -17,6 +18,9 @@ public interface TaskMapper {
     @Mapping(source = "assignedToMatricule", target = "assignedTo.matricule")
     Task toEntity(TaskDTO taskDTO);
 
-    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "id", ignore = true) // Ensure that ID is not overwritten
+    @Mapping(source = "sprintId", target = "sprint.id")
+    @Mapping(source = "assignedToMatricule", target = "assignedTo.matricule")
     void updateTaskFromDTO(TaskDTO taskDTO, @MappingTarget Task task);
 }
+

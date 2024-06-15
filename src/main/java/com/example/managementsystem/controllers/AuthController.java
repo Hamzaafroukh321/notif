@@ -72,11 +72,18 @@ public class AuthController {
                 .map(Permission::getName)
                 .collect(Collectors.toList());
 
+
+
+        Long matricule = user.getMatricule();
+
         Map<String, Object> response = new HashMap<>();
         response.put("token", token);
         response.put("roles", roles);
         response.put("permissions", permissions);
         response.put("firstTime", user.isFirstTime());
+        response.put("matricule", matricule);
+        response.put("nom", user.getNom());
+        response.put("prenom", user.getPrenom());
 
         return ResponseEntity.ok(response);
     }

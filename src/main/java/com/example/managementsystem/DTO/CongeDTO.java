@@ -12,7 +12,8 @@ public record CongeDTO(
         String motif,
         CongeStatus status,
         Long requestedByMatricule,
-        Long remplacantMatricule
+        Long remplacantMatricule,
+        Long approvedOrRejectedByMatricule // Ajout du champ
 ) {
 
 }

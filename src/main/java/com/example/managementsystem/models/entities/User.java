@@ -22,31 +22,14 @@ public class User implements UserDetails {
     @SequenceGenerator(name = "user_seq", initialValue = 10000, allocationSize = 1)
     private Long matricule;
 
-
     private String nom;
-
-
     private String prenom;
-
-
     private String emailpersonnel;
-
-
     private String email;
-
-
     private String password;
-
-
     private String tel;
-
-
     private String adresse;
-
-
     private String departement;
-
-
     private String civilite;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -57,10 +40,10 @@ public class User implements UserDetails {
     )
     private Set<UserRole> roles;
 
-    @OneToMany(mappedBy = "requestedBy")
+    @OneToMany(mappedBy = "requestedBy", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Congees> conges;
 
-    @ManyToMany(mappedBy = "teamMembers")
+    @ManyToMany(mappedBy = "teamMembers", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<Projet> projets;
 
     @Column(nullable = false)

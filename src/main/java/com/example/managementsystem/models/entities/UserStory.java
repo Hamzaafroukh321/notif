@@ -12,10 +12,20 @@ public class UserStory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(columnDefinition = "TEXT")
     private String description;
     private String priority;
 
     @ManyToOne
     @JoinColumn(name = "backlog_id")
     private Backlog backlog;
+
+    @Override
+    public String toString() {
+        return "UserStory{" +
+                "id=" + id +
+                ", description='" + description + '\'' +
+                ", priority='" + priority + '\'' +
+                '}';
+    }
 }

@@ -3,6 +3,8 @@ package com.example.managementsystem.exceptions;
 
 
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -10,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.example.managementsystem.exceptions.BadRequestException;
@@ -18,11 +21,22 @@ import com.example.managementsystem.exceptions.ErrorResponse;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
+import java.io.IOException;
 import java.util.stream.Collectors;
 
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
+    public void handleHttpMediaTypeNotAcceptableException(HttpMediaTypeNotAcceptableException ex, HttpServletRequest request, HttpServletResponse response) throws IOException, HttpMediaTypeNotAcceptableException {
+        if (request.getRequestURI().contains("/notifications/")) {
+            response.setContentType("text/event-stream");
+            response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, ex.getMessage());
+        } else {
+            throw ex; // Allow the default handler to handle it
+        }
+    }
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFoundException(NotFoundException ex) {

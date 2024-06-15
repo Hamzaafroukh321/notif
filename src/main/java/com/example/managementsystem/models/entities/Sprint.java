@@ -24,4 +24,15 @@ public class Sprint {
 
     @OneToMany(mappedBy = "sprint")
     private List<Task> tasks;
+
+    @Override
+    public String toString() {
+        return "Sprint{" +
+                "id=" + id +
+                ", nom='" + nom + '\'' +
+                ", dateDebut=" + dateDebut +
+                ", dateFin=" + dateFin +
+                ", projetId=" + projet +
+                '}';
+    }
 }

@@ -9,5 +9,5 @@ import java.time.LocalDateTime;
 public class Notification {
     private String message;
     private LocalDateTime timestamp;
-    private String recipient;
+    private Long recipient; // Matricule de l'utilisateur
 }

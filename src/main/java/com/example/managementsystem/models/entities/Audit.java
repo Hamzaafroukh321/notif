@@ -23,8 +23,8 @@ public class Audit {
 
     @Column(nullable = false)
     private String action;
-
-    @Column
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String description;
 
 

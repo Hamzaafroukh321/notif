@@ -32,34 +32,30 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         // Créer les permissions
+        // Define the permissions
+        Permission requestLeave = createPermissionIfNotExists("REQUEST_LEAVE");
+        Permission manageRequestLeave = createPermissionIfNotExists("MANAGE_REQUEST_LEAVE");
+        Permission managePermissions = createPermissionIfNotExists("MANAGE_PERMISSIONS");
+        Permission manageProjects = createPermissionIfNotExists("MANAGE_PROJECTS");
+        Permission viewProject = createPermissionIfNotExists("VIEW_PROJECT");
+        Permission assignTasks = createPermissionIfNotExists("ASSIGN_TASKS");
+        Permission manageTasks = createPermissionIfNotExists("MANAGE_TASKS");
+        Permission manageAudit = createPermissionIfNotExists("MANAGE_AUDIT");
         Permission manageUsers = createPermissionIfNotExists("MANAGE_USERS");
         Permission viewUsers = createPermissionIfNotExists("VIEW_USERS");
-        Permission resetPassword = createPermissionIfNotExists("RESET_PASSWORD");
-        Permission manageProjects = createPermissionIfNotExists("MANAGE_PROJECTS");
-        Permission manageTeams = createPermissionIfNotExists("MANAGE_TEAMS");
-        Permission viewProjectProgress = createPermissionIfNotExists("VIEW_PROJECT_PROGRESS");
-        Permission manageSprints = createPermissionIfNotExists("MANAGE_SPRINTS");
-        Permission manageTasks = createPermissionIfNotExists("MANAGE_TASKS");
-        Permission requestLeave = createPermissionIfNotExists("REQUEST_LEAVE");
-        Permission approveLeave = createPermissionIfNotExists("APPROVE_LEAVE");
-        Permission viewAssignedTasks = createPermissionIfNotExists("VIEW_ASSIGNED_TASKS");
-        Permission updateTaskStatus = createPermissionIfNotExists("UPDATE_TASK_STATUS");
-        Permission submitTask = createPermissionIfNotExists("SUBMIT_TASK");
-        Permission viewActiveSprint = createPermissionIfNotExists("VIEW_ACTIVE_SPRINT");
+        Permission chatMessage = createPermissionIfNotExists("CHAT_MESSAGE");
+
+// Create roles with their default permissions
+        createUserRoleIfNotExists("ADMIN", Set.of(manageUsers, managePermissions, manageAudit, viewUsers));
+        createUserRoleIfNotExists("MANAGER", Set.of(manageRequestLeave, manageProjects, viewUsers));
+        createUserRoleIfNotExists("PROJECT_MANAGER", Set.of(viewProject, assignTasks, requestLeave, viewUsers));
+        createUserRoleIfNotExists("TEAM_MEMBER", Set.of(manageTasks, requestLeave, viewUsers));
 
 
 
-        // Créer les rôles utilisateur avec leurs permissions par défaut
-        createUserRoleIfNotExists("ADMIN", Set.of(manageUsers, resetPassword, viewUsers));
-        createUserRoleIfNotExists("MANAGER", Set.of(manageProjects, manageTeams, viewProjectProgress, manageSprints, approveLeave));
-        createUserRoleIfNotExists("PROJECT_MANAGER", Set.of(manageTasks, viewProjectProgress, manageSprints, requestLeave));
-        createUserRoleIfNotExists("TEAM_MEMBER", Set.of(viewAssignedTasks, updateTaskStatus, submitTask, viewActiveSprint, requestLeave));
 
-        createUserIfNotExists("admin", "password123", "admin@example.com", "adminpersonnel@example.com", "ADMIN");
-        createUserIfNotExists("admin2", "password123", "admin2@example.com", "adminpersonnel2@example.com", "ADMIN");
-        createUserIfNotExists("manager", "password123", "manager@example.com", "managerpersonnel@example.com", "MANAGER");
-        createUserIfNotExists("project_manager", "password123", "project_manager@example.com", "projectmanagerpersonnel@example.com", "PROJECT_MANAGER");
-        createUserIfNotExists("team_member", "password123", "team_member@example.com", "teammemberpersonnel@example.com", "TEAM_MEMBER");
+        createUserIfNotExists("admin", "password123", "admin@dxc.com", "adminpersonnel@example.com", "ADMIN");
+
     }
 
     private Permission createPermissionIfNotExists(String name) {

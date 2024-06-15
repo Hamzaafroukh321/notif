@@ -38,12 +38,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+        // Ignorer les requêtes WebSocket
+        if ("websocket".equalsIgnoreCase(request.getHeader("Upgrade"))) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String token = getTokenFromRequest(request);
         if (StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)) {
             String userEmail = jwtTokenProvider.getUserEmailFromToken(token);
             UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
             List<String> authorities = jwtTokenProvider.getAuthoritiesFromToken(token);
+            System.out.println("Authorities from token: " + authorities);  // Ligne de débogage
+
             Collection<? extends GrantedAuthority> grantedAuthorities = authorities.stream()
                     .map(SimpleGrantedAuthority::new)
                     .collect(Collectors.toList());

@@ -9,12 +9,15 @@ import com.example.managementsystem.repositories.PermissionRepository;
 import com.example.managementsystem.repositories.UserRoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.Optional;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.List;
 
 @Service
+@Transactional
 public class UserRoleService {
 
     @Autowired
@@ -53,8 +56,9 @@ public class UserRoleService {
                 .orElseThrow(() -> new NotFoundException("UserRole not found with name: " + name));
 
         Set<Permission> permissions = permissionNames.stream()
-                .map(permissionName -> permissionRepository.findByName(permissionName)
-                        .orElseThrow(() -> new NotFoundException("Permission not found with name: " + permissionName)))
+                .map(permissionName -> permissionRepository.findByName(permissionName))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .collect(Collectors.toSet());
 
         userRole.setPermissions(permissions);

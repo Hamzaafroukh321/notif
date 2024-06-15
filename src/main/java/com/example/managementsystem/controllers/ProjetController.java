@@ -1,11 +1,18 @@
 package com.example.managementsystem.controllers;
 
 import com.example.managementsystem.DTO.ProjetDTO;
+import com.example.managementsystem.DTO.TaskDTO;
+import com.example.managementsystem.DTO.UserDTO;
+import com.example.managementsystem.models.entities.Task;
 import com.example.managementsystem.services.ProjetService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/projets")
@@ -27,18 +34,31 @@ public class ProjetController {
         return projetService.getProjetById(id);
     }
 
-    @PostMapping
+    @PutMapping
     public ProjetDTO createProjet(@RequestBody ProjetDTO projetDTO) {
         return projetService.createProjet(projetDTO);
     }
 
-    @PutMapping("/{id}")
-    public ProjetDTO updateProjet(@PathVariable Long id, @RequestBody ProjetDTO projetDTO) {
-        return projetService.updateProjet(id, projetDTO);
+    @PutMapping("/{id}/partial")
+    public ProjetDTO updateProjetPartially(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
+        return projetService.updateProjetPartially(id, updates);
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteProjet(@PathVariable Long id) {
-        projetService.deleteProjetById(id);
+    @GetMapping("/chef/{chefMatricule}")
+    public ResponseEntity<List<ProjetDTO>> getProjetsByChefMatricule(@PathVariable Long chefMatricule) {
+        List<ProjetDTO> projets = projetService.getProjetsByChefMatricule(chefMatricule);
+        return ResponseEntity.ok(projets);
     }
+    @GetMapping("/{projetId}/team-members")
+    public ResponseEntity<List<UserDTO>> getTeamMembersByProjetId(@PathVariable Long projetId) {
+        List<UserDTO> teamMembers = projetService.getTeamMembersByProjetId(projetId);
+        return ResponseEntity.ok(teamMembers);
+    }
+
+    @GetMapping("/{projetId}/tasks")
+    public ResponseEntity<List<TaskDTO>> getTasksByProjetId(@PathVariable Long projetId) {
+        List<TaskDTO> tasks = projetService.getTasksByProjetId(projetId);
+        return ResponseEntity.ok(tasks);
+    }
+
 }

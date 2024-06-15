@@ -15,6 +15,8 @@ public class Projet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String nom;
+
+    @Column(columnDefinition = "TEXT")
     private String description;
     private LocalDate dateDebut;
     private LocalDate dateFin;
@@ -24,7 +26,7 @@ public class Projet {
     @ManyToOne
     private User chef;
 
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "projet_team_members",
             joinColumns = @JoinColumn(name = "projet_id"),
@@ -32,9 +34,19 @@ public class Projet {
     )
     private List<User> teamMembers;
 
-    @OneToMany(mappedBy = "projet")
+    @OneToMany(mappedBy = "projet", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Backlog> backlogs;
 
-    @OneToMany(mappedBy = "projet")
+    @OneToMany(mappedBy = "projet", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Sprint> sprints;
+
+
+    //to string method
+
+    @Override
+    public String toString() {
+        return "Projet{" +
+                "id=" + id +
+                '}';
+    }
 }

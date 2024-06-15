@@ -60,5 +60,4 @@ public class UserRoleController {
         UserRoleDTO updatedUserRole = userRoleService.updateUserRolePermissions(name, permissionNames);
         return new ResponseEntity<>(updatedUserRole, HttpStatus.OK);
     }
-
 }
