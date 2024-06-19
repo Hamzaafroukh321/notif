@@ -13,6 +13,8 @@ import com.example.managementsystem.models.entities.User;
 import com.example.managementsystem.notification.NotificationService;
 import com.example.managementsystem.repositories.CongeesRepository;
 import com.example.managementsystem.repositories.UserRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.managementsystem.mappers.CongeMapper;
 
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -126,11 +129,8 @@ public class CongeesService {
     private void sendNotification(User user, String message) {
         UserDTO userDTO = userService.getUserByMatricule(user.getMatricule());
 
-        Notification notification = new Notification();
-        notification.setMessage(message);
-        notification.setRecipient(userDTO.matricule());
-
-        notificationService.sendNotification(notification);
+        String recipientMatricule = userDTO.email(); // Utiliser directement le matricule
+        notificationService.sendNotification(message, recipientMatricule);
     }
 
 

@@ -1,4 +1,6 @@
+
 package com.example.managementsystem.config;
+
 
 import com.example.managementsystem.models.entities.Permission;
 import com.example.managementsystem.models.entities.User;
@@ -11,6 +13,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
 import java.util.Set;
 
 @Component
@@ -80,17 +83,21 @@ public class DataInitializer implements CommandLineRunner {
 
 
     private User createUserIfNotExists(String username, String password, String email, String emailPersonnel, String roleName) {
-        return userRepository.findByEmail(email)
-                .orElseGet(() -> {
-                    User user = new User();
-                    user.setEmail(email);
-                    user.setEmailpersonnel(emailPersonnel);
-                    user.setPassword(passwordEncoder.encode(password));
-                    UserRole userRole = userRoleRepository.findByName(roleName)
-                            .orElseThrow(() -> new RuntimeException("Role not found: " + roleName));
-                    user.setRoles(Set.of(userRole));
-                    return userRepository.save(user);
-                });
+        Optional<User> existingUser = userRepository.findByEmail(email);
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+            // update user details here if needed
+            return user;
+        } else {
+            User user = new User();
+            user.setEmail(email);
+            user.setEmailpersonnel(emailPersonnel);
+            user.setPassword(passwordEncoder.encode(password));
+            UserRole userRole = userRoleRepository.findByName(roleName)
+                    .orElseThrow(() -> new RuntimeException("Role not found: " + roleName));
+            user.setRoles(Set.of(userRole));
+            return userRepository.save(user);
+        }
     }
 
 

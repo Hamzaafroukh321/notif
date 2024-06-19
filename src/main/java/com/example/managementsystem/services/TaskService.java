@@ -148,10 +148,8 @@ public class TaskService {
     private void sendNotificationToAssignedUser(TaskDTO taskDTO, String message) {
         UserDTO assignedUser = userService.getUserByMatricule(taskDTO.assignedToMatricule());
 
-        Notification notification = new Notification();
-        notification.setMessage(message);
-        notification.setRecipient(assignedUser.matricule());
-
-        notificationService.sendNotification(notification);
+        String recipientMatricule = assignedUser.email(); // Utiliser directement le matricule
+        notificationService.sendNotification(message, recipientMatricule);
     }
+
 }

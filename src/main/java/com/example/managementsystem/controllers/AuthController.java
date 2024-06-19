@@ -84,6 +84,7 @@ public class AuthController {
         response.put("matricule", matricule);
         response.put("nom", user.getNom());
         response.put("prenom", user.getPrenom());
+        response.put("email", user.getEmail());
 
         return ResponseEntity.ok(response);
     }

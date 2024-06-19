@@ -1,28 +1,40 @@
 package com.example.managementsystem.notification;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.util.List;
+
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
 @RestController
+@RequestMapping("/api/notifications")
 public class NotificationController {
     private final NotificationService notificationService;
 
+    @Autowired
     public NotificationController(NotificationService notificationService) {
         this.notificationService = notificationService;
     }
 
-    @GetMapping(value = "/notifications/{matricule}", produces = "text/event-stream")
-    public SseEmitter getNotifications(@PathVariable Long matricule) {
-        return notificationService.createEmitter(matricule);
+    @PostMapping("/send")
+    public ResponseEntity<Void> sendNotification(@RequestParam String message, @RequestParam String userEmail) {
+        notificationService.sendNotification(message, userEmail);
+        return ResponseEntity.ok().build();
     }
 
-
-    @PostMapping("/notifications")
-    public Notification sendNotification(@RequestBody Notification notification) {
-        return notificationService.sendNotification(notification);
+    @GetMapping("/recipient")
+    public ResponseEntity<List<Notification>> getLatestNotificationsForRecipient(@RequestParam String email, @RequestParam int page, @RequestParam int size) {
+        List<Notification> notifications = notificationService.getLatestNotificationsForRecipient(email, page, size);
+        return ResponseEntity.ok(notifications);
     }
 }

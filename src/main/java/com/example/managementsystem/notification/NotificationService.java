@@ -1,36 +1,44 @@
 package com.example.managementsystem.notification;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.time.LocalDateTime;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
 
 @Service
 public class NotificationService {
-    private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
+    private final SimpMessagingTemplate messagingTemplate;
+    private final NotificationRepository notificationRepository;
+    private static final Logger logger = LoggerFactory.getLogger(NotificationService.class);
 
-    public SseEmitter createEmitter(Long recipientMatricule) {
-        SseEmitter emitter = new SseEmitter();
-        emitters.put(recipientMatricule, emitter);
-        emitter.onCompletion(() -> emitters.remove(recipientMatricule));
-        emitter.onTimeout(() -> emitters.remove(recipientMatricule));
-        emitter.onError(e -> emitters.remove(recipientMatricule));
-        return emitter;
+    @Autowired
+    public NotificationService(SimpMessagingTemplate messagingTemplate, NotificationRepository notificationRepository) {
+        this.messagingTemplate = messagingTemplate;
+        this.notificationRepository = notificationRepository;
     }
 
-    public Notification sendNotification(Notification notification) {
+    public Notification sendNotification(String message, String userEmail) {
+        Notification notification = new Notification();
+        notification.setMessage(message);
         notification.setTimestamp(LocalDateTime.now());
-        Long recipientMatricule = notification.getRecipient();
-        SseEmitter emitter = emitters.get(recipientMatricule);
-        if (emitter != null) {
-            try {
-                emitter.send(SseEmitter.event().name("notification").data(notification).reconnectTime(3000));
-            } catch (Exception e) {
-                emitters.remove(recipientMatricule);
-            }
-        }
-        return notification;
+        notification.setRecipient(userEmail);  // Use email as recipient
+
+        Notification savedNotification = notificationRepository.save(notification);
+        logger.info("Notification saved: " + savedNotification);
+        messagingTemplate.convertAndSendToUser(userEmail, "/queue/notifications", savedNotification);
+        logger.info("Notification sent via WebSocket to user " + userEmail);
+        return savedNotification;
+    }
+
+    public List<Notification> getLatestNotificationsForRecipient(String email, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "timestamp"));
+        return notificationRepository.findByRecipientOrderByTimestampDesc(email, pageable).getContent();
     }
 }
